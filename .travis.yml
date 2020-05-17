@@ -20,3 +20,4 @@ before_script:
 script:
   - source /usr/local/bootstrap/var.env
   - bash scripts/Generate_PKI_Certificates_For_Lab.sh
+  - bash scripts/DemoRun.sh
