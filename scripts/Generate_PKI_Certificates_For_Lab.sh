@@ -118,8 +118,8 @@ verify_or_generate_intermediate_ca () {
 
         echo "New Intermediate Certificate Authority successfully created ${1}"
         echo "Add CA to a sourced file as an environment variable for bootstrapping use later"
-        echo "export Intermediate_CA_${1}.pem=`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca.pem`" >> ${Int_CA_dir}/BootstrapCAs.sh
-        echo "export Intermediate_CA_${1}-key.pem=`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`" >> ${Int_CA_dir}/BootstrapCAs.sh
+        echo "export Intermediate_CA_${1}_pem='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+        echo "export Intermediate_CA_${1}_key_pem='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
 
     else
         echo "Existing Intermediate CA for ${1} has been found and will be used"
@@ -156,8 +156,8 @@ generate_application_certificates () {
 
     sed 's/app-specific-dns-hostname/'"${2}"'/g' $conf_dir/server-config.json > $Certs_dir/${1}/${1}-server-config.json
     sed 's/app-specific-dns-hostname/'"${3}"'/g' $conf_dir/peer-config.json > $Certs_dir/${1}/${1}-peer-config.json
-    sed 's/add-ip-address/'"${4}"'/g' $conf_dir/server-config.json > $Certs_dir/${1}/${1}-server-config.json
-    sed 's/add-ip-address/'"${4}"'/g' $conf_dir/peer-config.json > $Certs_dir/${1}/${1}-peer-config.json
+    sed -i -e 's/add-ip-address/'"${4}"'/g' $Certs_dir/${1}/${1}-server-config.json
+    sed -i -e 's/add-ip-address/'"${4}"'/g' $Certs_dir/${1}/${1}-peer-config.json
     cp -f $conf_dir/client-config.json $Certs_dir/${1}/${1}-client-config.json
 
     cfssl gencert -ca=$Int_CA_dir/${1}/${1}-intermediate-ca.pem -ca-key=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem -config=$conf_dir/certificate-profiles.json -profile=client $Certs_dir/${1}/${1}-client-config.json | cfssljson -bare $Certs_dir/${1}/${1}-cli

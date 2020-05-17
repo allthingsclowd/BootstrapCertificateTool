@@ -2,7 +2,7 @@
     "CN": "Server",
     "hosts": [
         "127.0.0.1",
-        "app-specific-dns-hostname",
+        "server.node.global.consul",
         "1.2.3.4",
         "localhost",
         "*.hashistack.ie",

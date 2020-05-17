@@ -2,7 +2,7 @@
     "CN": "Peer",
     "hosts": [
         "127.0.0.1",
-        "app-specific-dns-hostname",
+        "client.node.global.consul",
         "1.2.3.4",
         "localhost",
         "*.hashistack.ie",
