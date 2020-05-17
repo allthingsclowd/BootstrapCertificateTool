@@ -1,5 +1,5 @@
 {
-    "CN": "Hashistack.ie's ${1} Intermediate Certificate Authority",
+    "CN": "Hashistack.ie's consul Intermediate Certificate Authority",
     "hosts": [
         "hashistack.ie",
         "www.hashistack.ie"

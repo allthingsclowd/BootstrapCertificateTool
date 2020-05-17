@@ -1,3 +1,4 @@
 RootCAs/*
 Outputs/RootCA*
+Outputs/IntermediateCAs*
 .vagrant
