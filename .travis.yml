@@ -10,6 +10,7 @@ addons:
     - grep
     - nginx
     - curl
+    - golang-cfssl
 go:
 - '1.13'
 global:
@@ -17,6 +18,5 @@ global:
 before_script:
   - sudo rsync -az ${TRAVIS_BUILD_DIR}/ /usr/local/bootstrap/
 script:
-- source /usr/local/bootstrap/var.env
-- bash scripts/Generate_PKI_Certificates_For_Lab.sh
--
+  - source /usr/local/bootstrap/var.env
+  - bash /usr/local/bootstrap/scripts/DemoRun.sh

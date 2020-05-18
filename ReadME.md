@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/allthingsclowd/BootstrapCertificateTool.svg?branch=master)](https://travis-ci.org/allthingsclowd/BootstrapCertificateTool)
+
 # Self-Signed Certificate Generation
 
 This repo stores the scripts and process that I currently use to generate the ephemeral certificates to bootstrap my demo environment. Don't get excited to think you've found a valuable CA on Github :) [Note to self, try to remember not to use these CAs for non demo environments...doh!]
