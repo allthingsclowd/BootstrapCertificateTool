@@ -19,5 +19,4 @@ before_script:
   - sudo rsync -az ${TRAVIS_BUILD_DIR}/ /usr/local/bootstrap/
 script:
   - source /usr/local/bootstrap/var.env
-  - bash chmod +x scripts/DemoRun.sh
-  - bash scripts/DemoRun.sh
+  - bash /usr/local/bootstrap/scripts/DemoRun.sh
