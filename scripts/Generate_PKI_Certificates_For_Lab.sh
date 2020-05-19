@@ -39,13 +39,17 @@ install_cfssl () {
         echo -e "\nStart CFSSL installation"
         go get -u github.com/cloudflare/cfssl/cmd/cfssl
         go get -u github.com/cloudflare/cfssl/cmd/cfssljson
+        echo -e "\nCFSSL installation complete"
     }
+    echo -e "\nCFSSL version: `cfssl --version` installed"
+    
 }
 
 install_go () {
-    echo -e "\nStart Golang installation"
+    
     which /usr/local/go/bin/go &>/dev/null || {
-        echo "Create a temporary directory"
+        echo -e "\nStart Golang installation"
+        echo -e "Create a temporary directory\n"
         sudo mkdir -p /tmp/go_src
         pushd /tmp/go_src
         [ -f go${golang_version}.linux-amd64.tar.gz ] || {
@@ -63,10 +67,11 @@ install_go () {
         echo "Ensure others can execute the binaries"
         sudo chmod -R +x /usr/local/go/bin/
 
-        source /etc/profile    
+        source /etc/profile
+        echo -e "\nGolang installation complete"  
     }
 
-    echo "`go version` successfully installed!"
+    echo "`go version` installed!"
 }
 
 verify_or_generate_root_ca () {
