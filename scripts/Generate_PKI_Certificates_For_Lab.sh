@@ -134,6 +134,10 @@ verify_or_generate_intermediate_ca () {
             echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
             source /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
             cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
+        else
+            echo -e "Error - Please Ensure to set the Certificate Environment Variables!"
+            echo -e "1. TF_VAR_Int_CA_${1}_intermediate_ca"
+            echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
         fi
     else
         echo "Existing Intermediate CA for ${1} has been found and will be used"
