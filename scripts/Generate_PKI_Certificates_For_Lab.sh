@@ -41,7 +41,7 @@ install_cfssl () {
         go get -u github.com/cloudflare/cfssl/cmd/cfssljson
         echo -e "\nCFSSL installation complete"
     }
-    echo -e "\nCFSSL version: `cfssl --version` installed"
+    echo -e "\nCFSSL version: `cfssl version` installed"
     
 }
 
