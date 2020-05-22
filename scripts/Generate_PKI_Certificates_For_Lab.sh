@@ -190,9 +190,11 @@ generate_application_certificates () {
     sed 's/app-specific-dns-hostname/'"${3}"'/g' $conf_dir/peer-config.json > $Certs_dir/${1}/${1}-peer-config.json
     sed -i -e 's/add-ip-address/'"${4}"'/g' $Certs_dir/${1}/${1}-server-config.json
     sed -i -e 's/add-ip-address/'"${4}"'/g' $Certs_dir/${1}/${1}-peer-config.json
-    sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-server-config.json
-    sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-peer-config.json
+    sed -i -e 's/hostname/'"${HOSTNAME}"'/g' $Certs_dir/${1}/${1}-server-config.json
+    sed -i -e 's/hostname/'"${HOSTNAME}"'/g' $Certs_dir/${1}/${1}-peer-config.json
     # debug
+    echo "Debug Leaf Certificates for ${1}"
+    ls -al $Certs_dir/${1}/${1}-server-config.json
     cat $Certs_dir/${1}/${1}-server-config.json
     cp -f $conf_dir/client-config.json $Certs_dir/${1}/${1}-client-config.json
 
