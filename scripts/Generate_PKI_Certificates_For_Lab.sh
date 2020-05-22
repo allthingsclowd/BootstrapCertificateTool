@@ -54,7 +54,8 @@ install_cfssl () {
         go get -u github.com/cloudflare/cfssl/cmd/cfssljson
         echo -e "\nCFSSL installation complete"
     }
-    echo "CFSSL version: `cfssl --version` installed"
+
+    echo -e "\nCFSSL version: `cfssl version` installed"
     
 }
 
@@ -116,29 +117,42 @@ verify_or_generate_root_ca () {
 
 verify_or_generate_intermediate_ca () {
     
-    # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}
-    if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.csr" ]
+    # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
+    if [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_key" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_csr" ]
     then
-        echo "No Intermediate CA has been found in ${1} : ? "
-        echo "Checking for a Root CA"
-        # Check if the Root CA exists, if not create that first!
-        verify_or_generate_root_ca
-        
-        echo "Generating a new Intermediate Certificate Authority now for ${1}"
+        # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
+        if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.csr" ]
+        then
+            echo "No Intermediate CA has been found in ${1} : ? "
+            echo "Checking for a Root CA"
+            # Check if the Root CA exists, if not create that first!
+            verify_or_generate_root_ca
 
-        export TMP_Int_CA_dir=$Int_CA_dir/${1}
-        [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir        
+            echo "Generating a new Intermediate Certificate Authority now for ${1}"
 
-        sed 's/Root/'"${1}"' Intermediate/g' $conf_dir/ca-config.json > $Int_CA_dir/${1}/${1}-intermediate-ca.json
-        cfssl gencert -initca $Int_CA_dir/${1}/${1}-intermediate-ca.json | cfssljson -bare $Int_CA_dir/${1}/${1}-intermediate-ca
-        cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-ca
-        ls -al $Int_CA_dir/${1}/
+            export TMP_Int_CA_dir=$Int_CA_dir/${1}
+            [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir        
 
-        echo "New Intermediate Certificate Authority successfully created ${1}"
-        echo "Add CA to a sourced file as an environment variable for bootstrapping use later"
-        echo "export Intermediate_CA_${1}_pem='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
-        echo "export Intermediate_CA_${1}_key_pem='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+            sed 's/Root/'"${1}"' Intermediate/g' $conf_dir/ca-config.json > $Int_CA_dir/${1}/${1}-intermediate-ca.json
+            cfssl gencert -initca $Int_CA_dir/${1}/${1}-intermediate-ca.json | cfssljson -bare $Int_CA_dir/${1}/${1}-intermediate-ca
+            cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-ca
+            ls -al $Int_CA_dir/${1}/
 
+            echo "New Intermediate Certificate Authority successfully created ${1}"
+            echo "Add CA to a sourced file as an environment variable for bootstrapping use later"
+            echo "export TF_VAR_Int_CA_${1}_intermediate_ca='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+            echo "export TF_VAR_Int_CA_${1}_intermediate_ca_key='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+
+            echo -e "Setting newly created environment variables:\n" 
+            echo -e "1. TF_VAR_Int_CA_${1}_intermediate_ca"
+            echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
+            source /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
+            cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
+        else
+            echo -e "Error - Please Ensure to set the Certificate Environment Variables!"
+            echo -e "1. TF_VAR_Int_CA_${1}_intermediate_ca"
+            echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
+        fi
     else
         echo "Existing Intermediate CA for ${1} has been found and will be used"
         echo "The Root CA will not be required or used."
@@ -236,5 +250,5 @@ generate_application_certificates ${1} ${2} ${3} ${4}
 
 
 # The intermediate certificates will be configured as environment variables to be consumed during platofrm deployment time
-
+cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
 echo -e "\nFinished Certification Process"

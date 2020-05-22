@@ -30,9 +30,7 @@ The same applies for the Root CA when the script is creating the Intermediate CA
 
 LetsEncrypt Public Certs
 
-```
-
-bash
+```ShellSession
 
 root@cert-server01:/usr/local/bootstrap/scripts# DOMAIN=hashistack.ie
 root@cert-server01:/usr/local/bootstrap/scripts#     certbot certonly --manual \
