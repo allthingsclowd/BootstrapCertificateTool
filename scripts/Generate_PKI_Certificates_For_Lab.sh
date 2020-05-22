@@ -27,7 +27,20 @@ setup_env () {
     [ -f /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh ] && {
         source /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
     }
+  
+    IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
+    CIDR=`ip addr show ${IFACE} | awk '$2 ~ "192.168.9" {print $2}'`
+    IP=${CIDR%%/24}
     
+    if [ "${TRAVIS}" == "true" ]; then
+        ROOTCERTPATH=tmp
+        IP=${IP:-127.0.0.1}
+        LEADER_IP=${IP}
+    else
+        ROOTCERTPATH=etc
+    fi
+
+    export ROOTCERTPATH 
 
 }
 
@@ -41,7 +54,7 @@ install_cfssl () {
         go get -u github.com/cloudflare/cfssl/cmd/cfssljson
         echo -e "\nCFSSL installation complete"
     }
-    echo -e "\nCFSSL version: `cfssl --version` installed"
+    echo "CFSSL version: `cfssl --version` installed"
     
 }
 
@@ -173,6 +186,33 @@ generate_application_certificates () {
     verify_certificate $Certs_dir/${1}/${1}-cli
     verify_certificate $Certs_dir/${1}/${1}-peer
     verify_certificate $Certs_dir/${1}/${1}-server
+
+    # placing certificates into directories for lab environment
+    mkdir --parent /${ROOTCERTPATH}/${1}.d/pki/tls/private /${ROOTCERTPATH}/${1}.d/pki/tls/certs
+    mv $Certs_dir/${1}/${1}-server.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
+    mv $Certs_dir/${1}/${1}-server-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server-key.pem
+
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
+
+    mv $Certs_dir/${1}/${1}-peer.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-peer.pem
+    mv $Certs_dir/${1}/${1}-peer-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
+
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-peer.pem
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
+
+    mv $Certs_dir/${1}/${1}-cli.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
+    mv $Certs_dir/${1}/${1}-cli-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem
+
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem 
+
+    chown -R ${1}:${1} /${ROOTCERTPATH}/${1}.d
+
+    # debug
+    ls -al /${ROOTCERTPATH}/${1}.d/pki/tls/private/
+    ls -al /${ROOTCERTPATH}/${1}.d/pki/tls/certs/
+    echo "Finished generating certificates for data centre with domain ${1}" 
 
 }
 
