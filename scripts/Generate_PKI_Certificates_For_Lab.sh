@@ -2,7 +2,7 @@
 
 setup_env () {
 
-    set -x
+    set +x
 
     # Binary versions to check for
     [ -f /usr/local/bootstrap/var.env ] && {
@@ -229,9 +229,6 @@ generate_application_certificates () {
 
     chown -R ${1}:${1} /${ROOTCERTPATH}/${1}.d
 
-    # debug
-    ls -al /${ROOTCERTPATH}/${1}.d/pki/tls/private/
-    ls -al /${ROOTCERTPATH}/${1}.d/pki/tls/certs/
     echo "Finished generating certificates for data centre with domain ${1}" 
 
 }
