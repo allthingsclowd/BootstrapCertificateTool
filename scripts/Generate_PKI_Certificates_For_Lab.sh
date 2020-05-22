@@ -192,6 +192,8 @@ generate_application_certificates () {
     sed -i -e 's/add-ip-address/'"${4}"'/g' $Certs_dir/${1}/${1}-peer-config.json
     sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-server-config.json
     sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-peer-config.json
+    # debug
+    cat $Certs_dir/${1}/${1}-server-config.json
     cp -f $conf_dir/client-config.json $Certs_dir/${1}/${1}-client-config.json
 
     cfssl gencert -ca=$Int_CA_dir/${1}/${1}-intermediate-ca.pem -ca-key=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem -config=$conf_dir/certificate-profiles.json -profile=client $Certs_dir/${1}/${1}-client-config.json | cfssljson -bare $Certs_dir/${1}/${1}-cli
@@ -251,6 +253,6 @@ install_cfssl
 generate_application_certificates ${1} ${2} ${3} ${4}
 
 
-# The intermediate certificates will be configured as environment variables to be consumed during platofrm deployment time
-cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
+# # The intermediate certificates will be configured as environment variables to be consumed during platofrm deployment time
+# cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
 echo -e "\nFinished Certification Process"
