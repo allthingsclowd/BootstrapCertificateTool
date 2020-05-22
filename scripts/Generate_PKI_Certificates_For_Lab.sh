@@ -190,7 +190,7 @@ generate_application_certificates () {
     # placing certificates into directories for lab environment
     mkdir --parent /${ROOTCERTPATH}/${1}.d/pki/tls/private /${ROOTCERTPATH}/${1}.d/pki/tls/certs
     mv $Certs_dir/${1}/${1}-server.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
-    mv $Certs_dir/${1}/${1}-server-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server-key.pem
+    mv $Certs_dir/${1}/${1}-server-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
 
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
