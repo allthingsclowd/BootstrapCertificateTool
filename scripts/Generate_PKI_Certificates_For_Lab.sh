@@ -95,9 +95,9 @@ convert_for_macOS () {
 
     if [ "${3}" = "ROOT" ] 
     then
-        openssl pkcs12 -export -out ${1}-cert.p12 -inkey ${1} -in ${2} -password pass:${CERTPASSCODE}
+        openssl pkcs12 -password pass:${CERTPASSCODE} -export -out ${1}-cert.p12 -inkey ${1} -in ${2} 
     else
-        openssl pkcs12 -export -out ${1}-cert.p12 -inkey ${1} -in ${2} -certfile ${3} -password pass:${CERTPASSCODE}
+        openssl pkcs12 -password pass:${CERTPASSCODE} -export -out ${1}-cert.p12 -inkey ${1} -in ${2} -certfile ${3}
     fi
 
 }
