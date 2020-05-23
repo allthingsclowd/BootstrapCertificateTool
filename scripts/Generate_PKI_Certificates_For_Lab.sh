@@ -89,14 +89,15 @@ install_go () {
 
 convert_for_macOS () {
 
-    # ${1} - key file suffix
-    # ${2} - CA file
+    # ${1} - key file
+    # ${2} - cert file
+    # ${3} - CA file
 
     if [ "${CA}" = "ROOT" ] 
     then
-        openssl pkcs12 -export -out ${1}-cert.p12 -inkey ${1}-key.pem -in ${1}.pem
+        openssl pkcs12 -export -out ${1}-cert.p12 -inkey ${1} -in ${2}
     else
-        openssl pkcs12 -export -out ${1}-cert.p12 -inkey ${1}-key.pem -in ${1}-signed-intermediate.pem -certfile ${2}
+        openssl pkcs12 -export -out ${1}-cert.p12 -inkey ${1} -in ${2} -certfile ${3}
     fi
 
 }
