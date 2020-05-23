@@ -84,7 +84,7 @@ install_go () {
         echo -e "\nGolang installation complete"  
     }
 
-    echo -e "`go version` installed!"
+    echo -e "`/usr/local/go/bin/go version` installed!"
 }
 
 convert_for_macOS () {
