@@ -135,7 +135,7 @@ verify_or_generate_root_ca () {
 verify_or_generate_intermediate_ca () {
     
     # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
-    if [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_key" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_csr" ]
+    if [ ! -z "$TF_VAR_Int_CA_${1}_root_signed_intermediate_ca" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_key" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_csr" ]
     then
         # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
         if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.csr" ]
@@ -161,11 +161,11 @@ verify_or_generate_intermediate_ca () {
 
             echo "New Intermediate Certificate Authority successfully created ${1}"
             echo "Add CA to a sourced file as an environment variable for bootstrapping use later"
-            echo "export TF_VAR_Int_CA_${1}_intermediate_ca='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+            echo "export TF_VAR_Int_CA_${1}_root_signed_intermediate_ca='`cat $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
             echo "export TF_VAR_Int_CA_${1}_intermediate_ca_key='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
 
             echo -e "Setting newly created environment variables:\n" 
-            echo -e "1. TF_VAR_Int_CA_${1}_intermediate_ca"
+            echo -e "1. TF_VAR_Int_CA_${1}_root_signed_intermediate_ca"
             echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
             source /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
             cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
