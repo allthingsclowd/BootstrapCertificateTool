@@ -92,7 +92,7 @@ convert_for_macOS () {
     # ${1} - key file suffix
     # ${2} - CA file
 
-    if [ "${CA}"="ROOT"] 
+    if [ "${CA}" = "ROOT" ] 
     then
         openssl pkcs12 -export -out ${1}-cert.p12 -inkey ${1}-key.pem -in ${1}.pem
     else
@@ -151,10 +151,10 @@ verify_or_generate_intermediate_ca () {
 
             sed 's/Root/'"${1}"' Intermediate/g' $conf_dir/ca-config.json > $Int_CA_dir/${1}/${1}-intermediate-ca.json
             cfssl gencert -initca $Int_CA_dir/${1}/${1}-intermediate-ca.json | cfssljson -bare $Int_CA_dir/${1}/${1}-intermediate-ca
-            cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-ca
+            cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
             
             # Convert for mac - openssl pkcs12 -export -out certificate.p12 -inkey privateKey.key -in certificate.crt -certfile CACert.crt
-            convert_for_macOS $Int_CA_dir/${1}/${1}-ca $CA_dir/hashistack-root-ca.pem
+            convert_for_macOS $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca $CA_dir/hashistack-root-ca.pem
             
             ls -al $Int_CA_dir/${1}/
 
