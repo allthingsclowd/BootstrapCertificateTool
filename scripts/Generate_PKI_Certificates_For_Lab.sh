@@ -23,6 +23,9 @@ setup_env () {
     export CA=$CA_dir/hashistack-root-ca.pem
     export CA_KEY=$CA_dir/hashistack-root-ca-key.pem
     export Cert_Profiles=$conf_dir/certificate-profiles.json
+    
+    export SIGNED_CA_CERT=${1}_root_signed_intermediate_ca
+    export INT_CA_KEY=${1}_intermediate_ca_key
 
     [ -f /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh ] && {
         source /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
@@ -136,7 +139,7 @@ verify_or_generate_intermediate_ca () {
     
     # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
 
-    if [ ! -z "$(${1}_intermediate_ca_key)" ] || [ ! -z "$(${1}_root_signed_intermediate_ca)" ];
+    if [ ! -z "${SIGNED_CA_CERT}" ] || [ ! -z "${INT_CA_KEY}" ];
     then
         # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
         if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem" ];
@@ -207,9 +210,6 @@ generate_application_certificates () {
     echo "Start creating Leaf Certificates for ${1}"
     export TMP_Cert_dir=$Certs_dir/${1}
     [ ! -d $TMP_Cert_dir ] && mkdir -p $TMP_Cert_dir
-    
-    export SIGNED_CA_CERT=${1}_root_signed_intermediate_ca
-    export INT_CA_KEY=${1}_intermediate_ca_key
 
     sed 's/app-specific-dns-hostname/'"${2}"'/g' $conf_dir/server-config.json > $Certs_dir/${1}/${1}-server-config.json
     sed 's/app-specific-dns-hostname/'"${3}"'/g' $conf_dir/peer-config.json > $Certs_dir/${1}/${1}-peer-config.json
