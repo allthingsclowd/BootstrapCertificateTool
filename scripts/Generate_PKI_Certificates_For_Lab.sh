@@ -207,6 +207,9 @@ generate_application_certificates () {
     echo "Start creating Leaf Certificates for ${1}"
     export TMP_Cert_dir=$Certs_dir/${1}
     [ ! -d $TMP_Cert_dir ] && mkdir -p $TMP_Cert_dir
+    
+    export SIGNED_CA_CERT=${1}_root_signed_intermediate_ca
+    export INT_CA_KEY=${1}_intermediate_ca_key
 
     sed 's/app-specific-dns-hostname/'"${2}"'/g' $conf_dir/server-config.json > $Certs_dir/${1}/${1}-server-config.json
     sed 's/app-specific-dns-hostname/'"${3}"'/g' $conf_dir/peer-config.json > $Certs_dir/${1}/${1}-peer-config.json
@@ -220,9 +223,9 @@ generate_application_certificates () {
     #cat $Certs_dir/${1}/${1}-server-config.json
     cp -f $conf_dir/client-config.json $Certs_dir/${1}/${1}-client-config.json
 
-    cfssl gencert -ca=$(${1}_root_signed_intermediate_ca) -ca-key=$(${1}_intermediate_ca_key) -config=$conf_dir/certificate-profiles.json -profile=client $Certs_dir/${1}/${1}-client-config.json | cfssljson -bare $Certs_dir/${1}/${1}-cli
-    cfssl gencert -ca=$(${1}_root_signed_intermediate_ca) -ca-key=$$(${1}_intermediate_ca_key) -config=$conf_dir/certificate-profiles.json -profile=server $Certs_dir/${1}/${1}-server-config.json | cfssljson -bare $Certs_dir/${1}/${1}-server
-    cfssl gencert -ca=$(${1}_root_signed_intermediate_ca) -ca-key=$$(${1}_intermediate_ca_key) -config=$conf_dir/certificate-profiles.json -profile=peer $Certs_dir/${1}/${1}-peer-config.json | cfssljson -bare $Certs_dir/${1}/${1}-peer
+    cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=client $Certs_dir/${1}/${1}-client-config.json | cfssljson -bare $Certs_dir/${1}/${1}-cli
+    cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=server $Certs_dir/${1}/${1}-server-config.json | cfssljson -bare $Certs_dir/${1}/${1}-server
+    cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=peer $Certs_dir/${1}/${1}-peer-config.json | cfssljson -bare $Certs_dir/${1}/${1}-peer
 
     echo "Validate Certificates for ${1}"
     verify_certificate $Certs_dir/${1}/${1}-cli
