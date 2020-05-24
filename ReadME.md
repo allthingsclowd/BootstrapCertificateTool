@@ -2,6 +2,8 @@
 
 # Self-Signed Certificate Generation
 
+![CA Setup](https://github.com/allthingsclowd/BootstrapCertificateTool/blob/master/Bootstrapping%20my%20lab.svg)
+
 This repo stores the scripts and process that I currently use to generate the ephemeral certificates to bootstrap my demo environment. Don't get excited to think you've found a valuable CA on Github :) [Note to self, try to remember not to use these CAs for non demo environments...doh!]
 
 I use the certificates to illustrate how to secure and continue to work with HashiCorp's tools namely Consul, Vault and Nomad.

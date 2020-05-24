@@ -48,10 +48,9 @@ setup_env () {
 
 install_cfssl () {
     
-    which $HOME/go/bin/cfssl &>/dev/null || {
+    which /usr/bin/cfssl &>/dev/null || {
         echo -e "\nStart CFSSL installation"
-        go get -u github.com/cloudflare/cfssl/cmd/cfssl
-        go get -u github.com/cloudflare/cfssl/cmd/cfssljson
+        apt install golang-cfssl
         echo -e "\nCFSSL installation complete"
     }
 
@@ -85,7 +84,22 @@ install_go () {
         echo -e "\nGolang installation complete"  
     }
 
-    echo "`go version` installed!"
+    echo -e "`/usr/local/go/bin/go version` installed!"
+}
+
+convert_for_macOS () {
+
+    # ${1} - key file
+    # ${2} - cert file
+    # ${3} - CA file
+
+    if [ "${3}" = "ROOT" ] 
+    then
+        openssl pkcs12 -password pass:${CERTPASSCODE} -export -out ${1}-cert.p12 -inkey ${1} -in ${2} 
+    else
+        openssl pkcs12 -password pass:${CERTPASSCODE} -export -out ${1}-cert.p12 -inkey ${1} -in ${2} -certfile ${3}
+    fi
+
 }
 
 verify_or_generate_root_ca () {
@@ -102,6 +116,9 @@ verify_or_generate_root_ca () {
         echo "The above details can be changed by editing the data in the ${conf_dir}/ca-config.json file"
         cfssl gencert -initca $conf_dir/ca-config.json | cfssljson -bare $CA_dir/hashistack-root-ca
 
+        # Convert for mac - openssl pkcs12 -export -out certificate.p12 -inkey privateKey.key -in certificate.crt -certfile CACert.crt
+        convert_for_macOS $CA_dir/hashistack-root-ca-key.pem $CA_dir/hashistack-root-ca.pem ROOT
+
         # This is a Root CA so the CSR is not required
         [ -f "$CA_dir/hashistack-root-ca.csr" ] && rm -f $CA_dir/hashistack-root-ca.csr
 
@@ -117,9 +134,8 @@ verify_or_generate_root_ca () {
 
 verify_or_generate_intermediate_ca () {
     
-    # Construct environment variable
-    ${1}_Intermediate_Signed_CA=TF_VAR_Int_CA_${1}_intermediate_ca
     # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
+
     if [ ! -z "${1}_intermediate_ca_key" ] || [ ! -z "${1}_root_signed_intermediate_ca" ];
     then
         # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
@@ -137,16 +153,20 @@ verify_or_generate_intermediate_ca () {
 
             sed 's/Root/'"${1}"' Intermediate/g' $conf_dir/ca-config.json > $Int_CA_dir/${1}/${1}-intermediate-ca.json
             cfssl gencert -initca $Int_CA_dir/${1}/${1}-intermediate-ca.json | cfssljson -bare $Int_CA_dir/${1}/${1}-intermediate-ca
-            cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-ca
+            cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
+            
+            # Convert for mac - openssl pkcs12 -export -out certificate.p12 -inkey privateKey.key -in certificate.crt -certfile CACert.crt
+            convert_for_macOS $Int_CA_dir/${1}/${1}-intermediate-ca-key.pem $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem  $CA_dir/hashistack-root-ca.pem
+            
             ls -al $Int_CA_dir/${1}/
 
             echo "New Intermediate Certificate Authority successfully created ${1}"
             echo "Add CA to a sourced file as an environment variable for bootstrapping use later"
-            echo "export TF_VAR_Int_CA_${1}_intermediate_ca='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+            echo "export TF_VAR_Int_CA_${1}_root_signed_intermediate_ca='`cat $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
             echo "export TF_VAR_Int_CA_${1}_intermediate_ca_key='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
 
             echo -e "Setting newly created environment variables:\n" 
-            echo -e "1. TF_VAR_Int_CA_${1}_intermediate_ca"
+            echo -e "1. TF_VAR_Int_CA_${1}_root_signed_intermediate_ca"
             echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
             source /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
             cat /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
@@ -161,7 +181,7 @@ verify_or_generate_intermediate_ca () {
     fi
 
     echo "Validate Intermediate Certificate for ${1}"
-    verify_certificate $Int_CA_dir/${1}/${1}-ca
+    verify_certificate $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
 
 
 }
