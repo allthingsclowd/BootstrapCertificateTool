@@ -136,7 +136,7 @@ verify_or_generate_intermediate_ca () {
     
     # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
 
-    if [ ! -z "${1}_intermediate_ca_key" ] || [ ! -z "${1}_root_signed_intermediate_ca" ];
+    if [ ! -z "$(${1}_intermediate_ca_key)" ] || [ ! -z "$(${1}_root_signed_intermediate_ca)" ];
     then
         # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
         if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem" ];
@@ -162,18 +162,18 @@ verify_or_generate_intermediate_ca () {
 
             echo "New Intermediate Certificate Authority successfully created ${1}"
             echo "Add CA to a sourced file as an environment variable for bootstrapping use later"
-            echo "export TF_VAR_Int_CA_${1}_root_signed_intermediate_ca='`cat $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
-            echo "export TF_VAR_Int_CA_${1}_intermediate_ca_key='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+            echo "export ${1}_root_signed_intermediate_ca='`cat $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+            echo "export ${1}_intermediate_ca_key='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
 
             echo -e "Setting newly created environment variables:\n" 
-            echo -e "1. TF_VAR_Int_CA_${1}_root_signed_intermediate_ca"
-            echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
+            echo -e "1. ${1}_root_signed_intermediate_ca"
+            echo -e "2. ${1}_intermediate_ca_key"
             source /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
             cat /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
         else
             echo -e "Error - Please Ensure to set the Certificate Environment Variables!"
-            echo -e "1. TF_VAR_Int_CA_${1}_intermediate_ca"
-            echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
+            echo -e "1. ${1}_root_signed_intermediate_ca"
+            echo -e "2. ${1}_intermediate_ca_key"
         fi
     else
         echo "Existing Intermediate CA for ${1} has been found and will be used"
@@ -215,14 +215,14 @@ generate_application_certificates () {
     sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-server-config.json
     sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-peer-config.json
     # debug
-    echo "Debug Leaf Certificates for ${1}"
-    ls -al $Certs_dir/${1}/${1}-server-config.json
-    cat $Certs_dir/${1}/${1}-server-config.json
+    echo "Leaf Certificates for ${1}"
+    #ls -al $Certs_dir/${1}/${1}-server-config.json
+    #cat $Certs_dir/${1}/${1}-server-config.json
     cp -f $conf_dir/client-config.json $Certs_dir/${1}/${1}-client-config.json
 
-    cfssl gencert -ca=$Int_CA_dir/${1}/${1}-intermediate-ca.pem -ca-key=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem -config=$conf_dir/certificate-profiles.json -profile=client $Certs_dir/${1}/${1}-client-config.json | cfssljson -bare $Certs_dir/${1}/${1}-cli
-    cfssl gencert -ca=$Int_CA_dir/${1}/${1}-intermediate-ca.pem -ca-key=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem -config=$conf_dir/certificate-profiles.json -profile=server $Certs_dir/${1}/${1}-server-config.json | cfssljson -bare $Certs_dir/${1}/${1}-server
-    cfssl gencert -ca=$Int_CA_dir/${1}/${1}-intermediate-ca.pem -ca-key=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem -config=$conf_dir/certificate-profiles.json -profile=peer $Certs_dir/${1}/${1}-peer-config.json | cfssljson -bare $Certs_dir/${1}/${1}-peer
+    cfssl gencert -ca=$(${1}_root_signed_intermediate_ca) -ca-key=$(${1}_intermediate_ca_key) -config=$conf_dir/certificate-profiles.json -profile=client $Certs_dir/${1}/${1}-client-config.json | cfssljson -bare $Certs_dir/${1}/${1}-cli
+    cfssl gencert -ca=$(${1}_root_signed_intermediate_ca) -ca-key=$$(${1}_intermediate_ca_key) -config=$conf_dir/certificate-profiles.json -profile=server $Certs_dir/${1}/${1}-server-config.json | cfssljson -bare $Certs_dir/${1}/${1}-server
+    cfssl gencert -ca=$(${1}_root_signed_intermediate_ca) -ca-key=$$(${1}_intermediate_ca_key) -config=$conf_dir/certificate-profiles.json -profile=peer $Certs_dir/${1}/${1}-peer-config.json | cfssljson -bare $Certs_dir/${1}/${1}-peer
 
     echo "Validate Certificates for ${1}"
     verify_certificate $Certs_dir/${1}/${1}-cli
