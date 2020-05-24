@@ -11,21 +11,21 @@ setup_env () {
     }
 
     # Configure Directories
-    export conf_dir=/usr/local/bootstrap/conf
+    export conf_dir=/usr/local/bootstrap/conf/certificates
     [ ! -d $conf_dir ] && mkdir -p $conf_dir
-    export CA_dir=/usr/local/bootstrap/Outputs/RootCA
+    export CA_dir=/usr/local/bootstrap/.bootstrap/Outputs/RootCA
     [ ! -d $CA_dir ] && mkdir -p $CA_dir
-    export Int_CA_dir=/usr/local/bootstrap/Outputs/IntermediateCAs
+    export Int_CA_dir=/usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs
     [ ! -d $Int_CA_dir ] && mkdir -p $Int_CA_dir
-    export Certs_dir=/usr/local/bootstrap/Outputs/Certificates
+    export Certs_dir=/usr/local/bootstrap/.bootstrap/Outputs/Certificates
     [ ! -d $Certs_dir ] && mkdir -p $Certs_dir 
     
     export CA=$CA_dir/hashistack-root-ca.pem
     export CA_KEY=$CA_dir/hashistack-root-ca-key.pem
     export Cert_Profiles=$conf_dir/certificate-profiles.json
 
-    [ -f /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh ] && {
-        source /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
+    [ -f /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh ] && {
+        source /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
     }
   
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
@@ -135,10 +135,11 @@ verify_or_generate_root_ca () {
 verify_or_generate_intermediate_ca () {
     
     # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
-    if [ ! -z "$TF_VAR_Int_CA_${1}_root_signed_intermediate_ca" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_key" ] || [ ! -z "$TF_VAR_Int_CA_${1}_intermediate_ca_csr" ]
+
+    if [ ! -z "${1}_intermediate_ca_key" ] || [ ! -z "${1}_root_signed_intermediate_ca" ];
     then
         # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
-        if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.csr" ]
+        if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem" ];
         then
             echo "No Intermediate CA has been found in ${1} : ? "
             echo "Checking for a Root CA"
@@ -167,8 +168,8 @@ verify_or_generate_intermediate_ca () {
             echo -e "Setting newly created environment variables:\n" 
             echo -e "1. TF_VAR_Int_CA_${1}_root_signed_intermediate_ca"
             echo -e "2. TF_VAR_Int_CA_${1}_intermediate_ca_key"
-            source /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
-            cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
+            source /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
+            cat /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
         else
             echo -e "Error - Please Ensure to set the Certificate Environment Variables!"
             echo -e "1. TF_VAR_Int_CA_${1}_intermediate_ca"
