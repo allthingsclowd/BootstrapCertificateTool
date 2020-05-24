@@ -120,10 +120,10 @@ verify_or_generate_intermediate_ca () {
     # Construct environment variable
     ${1}_Intermediate_Signed_CA=TF_VAR_Int_CA_${1}_intermediate_ca
     # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
-    if [ ! -z "${TF_VAR_Int_CA_$(echo ${1})_intermediate_ca}" ] || [ ! -z "$TF_VAR_Int_CA_$(echo ${1})_intermediate_ca_key" ] || [ ! -z "$TF_VAR_Int_CA_$(echo ${1})_intermediate_ca_csr" ]
+    if [ ! -z "${1}_intermediate_ca_key" ] || [ ! -z "${1}_root_signed_intermediate_ca" ];
     then
         # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
-        if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca.csr" ]
+        if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem" ];
         then
             echo "No Intermediate CA has been found in ${1} : ? "
             echo "Checking for a Root CA"
