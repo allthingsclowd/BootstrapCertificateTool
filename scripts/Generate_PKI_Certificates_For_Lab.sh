@@ -222,6 +222,11 @@ generate_application_certificates () {
     #ls -al $Certs_dir/${1}/${1}-server-config.json
     #cat $Certs_dir/${1}/${1}-server-config.json
     cp -f $conf_dir/client-config.json $Certs_dir/${1}/${1}-client-config.json
+    
+    export SIGNED_CA_CERT=${1}_root_signed_intermediate_ca
+    export INT_CA_KEY=${1}_intermediate_ca_key
+    
+    echo "Debug ===> ${SIGNED_CA_CERT}, ${INT_CA_KEY}"
 
     cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=client $Certs_dir/${1}/${1}-client-config.json | cfssljson -bare $Certs_dir/${1}/${1}-cli
     cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=server $Certs_dir/${1}/${1}-server-config.json | cfssljson -bare $Certs_dir/${1}/${1}-server
