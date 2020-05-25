@@ -238,7 +238,12 @@ generate_application_certificates () {
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem 
 
-    chown -R ${1}:${1} /${ROOTCERTPATH}/${1}.d
+    # if this is the final target system a user matching application name will exist
+    
+    if id -u "${1}" >/dev/null 2>&1; then
+        chown -R ${1}:${1} /${ROOTCERTPATH}/${1}.d
+    fi
+    
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
