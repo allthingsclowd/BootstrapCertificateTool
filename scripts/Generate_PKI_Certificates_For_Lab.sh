@@ -23,13 +23,8 @@ setup_env () {
     export CA=$CA_dir/hashistack-root-ca.pem
     export CA_KEY=$CA_dir/hashistack-root-ca-key.pem
     export Cert_Profiles=$conf_dir/certificate-profiles.json
-    
-    export SIGNED_CA_CERT=${1}_root_signed_intermediate_ca
-    export INT_CA_KEY=${1}_intermediate_ca_key
-
-    [ -f /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh ] && {
-        source /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
-    }
+    export SIGNED_CA_CERT=$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem
+    export INT_CA_KEY=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem
   
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
     CIDR=`ip addr show ${IFACE} | awk '$2 ~ "192.168.9" {print $2}'`
@@ -108,80 +103,69 @@ convert_for_macOS () {
 verify_or_generate_root_ca () {
 
     # Check if a ROOT CA has been provided in the directory
-    if [ ! -f "$CA" ] || [ ! -f "$CA_KEY" ]
+    if [ ! -f "${CA}" ] || [ ! -f "${CA_KEY}" ]
     then
 
-        echo "No Root CA has been found in $CA_dir : ? "
+        echo "No Root CA has been found in ${CA_dir} : ? "
         echo "Generating a new Root Certificate Authority now..."
         echo "Using the following configuration for the root CA:"
-        cat $conf_dir/ca-config.json
+        cat ${conf_dir}/ca-config.json
 
         echo "The above details can be changed by editing the data in the ${conf_dir}/ca-config.json file"
-        cfssl gencert -initca $conf_dir/ca-config.json | cfssljson -bare $CA_dir/hashistack-root-ca
+        cfssl gencert -initca ${conf_dir}/ca-config.json | cfssljson -bare ${CA_dir}/hashistack-root-ca
 
         # Convert for mac - openssl pkcs12 -export -out certificate.p12 -inkey privateKey.key -in certificate.crt -certfile CACert.crt
-        convert_for_macOS $CA_dir/hashistack-root-ca-key.pem $CA_dir/hashistack-root-ca.pem ROOT
+        convert_for_macOS ${CA_dir}/hashistack-root-ca-key.pem ${CA_dir}/hashistack-root-ca.pem ROOT
 
         # This is a Root CA so the CSR is not required
-        [ -f "$CA_dir/hashistack-root-ca.csr" ] && rm -f $CA_dir/hashistack-root-ca.csr
+        [ -f "${CA_dir}/hashistack-root-ca.csr" ] && rm -f ${CA_dir}/hashistack-root-ca.csr
 
 
     else
         echo "Existing Root CA has been found and will be used"
     fi
 
-    echo "Validate Root Certificate $CA"
-    verify_certificate $CA_dir/hashistack-root-ca
+    echo "Validate Root Certificate ${CA}"
+    verify_certificate ${CA_dir}/hashistack-root-ca
     
 }
 
 verify_or_generate_intermediate_ca () {
     
-    # Check if the intermediate CA has been provided in environment variables - input parameter ${1}
-
-    if [ ! -z "${SIGNED_CA_CERT}" ] || [ ! -z "${INT_CA_KEY}" ];
+    # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
+    if [ ! -f "${SIGNED_CA_CERT}" ] || [ ! -f "${INT_CA_KEY}" ];
     then
-        # Check if the intermediate CA has been provided in the supplied directory - input parameter ${1}    
-        if [ ! -f "$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem" ] || [ ! -f "$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem" ];
-        then
-            echo "No Intermediate CA has been found in ${1} : ? "
-            echo "Checking for a Root CA"
-            # Check if the Root CA exists, if not create that first!
-            verify_or_generate_root_ca
+        echo "No Intermediate CA has been found in : ${1} ? "
+        echo "Let's check to see if there's a known Root CA"
+        # Check if the Root CA exists, if not create that first!
+        verify_or_generate_root_ca
 
-            echo "Generating a new Intermediate Certificate Authority now for ${1}"
+        echo "Generating a new Intermediate Certificate Authority now for ${1}"
 
-            export TMP_Int_CA_dir=$Int_CA_dir/${1}
-            [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir        
+        export TMP_Int_CA_dir=$Int_CA_dir/${1}
+        [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir        
 
-            sed 's/Root/'"${1}"' Intermediate/g' $conf_dir/ca-config.json > $Int_CA_dir/${1}/${1}-intermediate-ca.json
-            cfssl gencert -initca $Int_CA_dir/${1}/${1}-intermediate-ca.json | cfssljson -bare $Int_CA_dir/${1}/${1}-intermediate-ca
-            cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
-            
-            # Convert for mac - openssl pkcs12 -export -out certificate.p12 -inkey privateKey.key -in certificate.crt -certfile CACert.crt
-            convert_for_macOS $Int_CA_dir/${1}/${1}-intermediate-ca-key.pem $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem  $CA_dir/hashistack-root-ca.pem
-            
-            ls -al $Int_CA_dir/${1}/
+        sed 's/Root/'"${1}"' Intermediate/g' $conf_dir/ca-config.json > $Int_CA_dir/${1}/${1}-intermediate-ca.json
+        cfssl gencert -initca $Int_CA_dir/${1}/${1}-intermediate-ca.json | cfssljson -bare $Int_CA_dir/${1}/${1}-intermediate-ca
+        cfssl sign -ca ${CA} -ca-key ${CA_KEY} --config ${Cert_Profiles} -profile intermediate-ca ${Int_CA_dir}/${1}/${1}-intermediate-ca.csr | cfssljson -bare $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
+        
+        # Convert for mac - openssl pkcs12 -export -out certificate.p12 -inkey privateKey.key -in certificate.crt -certfile CACert.crt
+        convert_for_macOS ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem ${Int_CA_dir}/${1}/${1}-root-signed-intermediate-ca.pem  ${CA_dir}/hashistack-root-ca.pem
+        
+        ls -al ${Int_CA_dir}/${1}/
 
-            echo "New Intermediate Certificate Authority successfully created ${1}"
-            echo "Add CA to a sourced file as an environment variable for bootstrapping use later"
-            echo "export ${1}_root_signed_intermediate_ca='`cat $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
-            echo "export ${1}_intermediate_ca_key='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+        echo "New Intermediate Certificate Authority successfully created ${1}"
+        echo "Add CA to a sourced file as an environment variable for bootstrapping use later in Terraform Cloud deployments."
+        echo "export ${1}_root_signed_intermediate_ca='`cat $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
+        echo "export ${1}_intermediate_ca_key='`cat ${Int_CA_dir}/${1}/${1}-intermediate-ca-key.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
 
-            echo -e "Setting newly created environment variables:\n" 
-            echo -e "1. ${1}_root_signed_intermediate_ca"
-            echo -e "2. ${1}_intermediate_ca_key"
-            source /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
-            cat /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
-        else
-            echo -e "Error - Please Ensure to set the Certificate Environment Variables!"
-            echo -e "1. ${1}_root_signed_intermediate_ca"
-            echo -e "2. ${1}_intermediate_ca_key"
-        fi
     else
         echo "Existing Intermediate CA for ${1} has been found and will be used"
         echo "The Root CA will not be required or used."
     fi
+
+
+ 
 
     echo "Validate Intermediate Certificate for ${1}"
     verify_certificate $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
@@ -217,14 +201,10 @@ generate_application_certificates () {
     sed -i -e 's/add-ip-address/'"${4}"'/g' $Certs_dir/${1}/${1}-peer-config.json
     sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-server-config.json
     sed -i -e 's/hostname/'"${HOSTNAME}.hashistack.ie"'/g' $Certs_dir/${1}/${1}-peer-config.json
-    # debug
+   
     echo "Leaf Certificates for ${1}"
-    #ls -al $Certs_dir/${1}/${1}-server-config.json
-    #cat $Certs_dir/${1}/${1}-server-config.json
+
     cp -f $conf_dir/client-config.json $Certs_dir/${1}/${1}-client-config.json
-    
-    export SIGNED_CA_CERT=${1}_root_signed_intermediate_ca
-    export INT_CA_KEY=${1}_intermediate_ca_key
     
     echo "Debug ===> ${SIGNED_CA_CERT}, ${INT_CA_KEY}"
 
@@ -273,7 +253,9 @@ verify_certificate () {
     fi
 }
 
-echo -e "\nStarting Certification Process"
+echo -e "\n===================================================="
+echo -e "\nStarting to create application certificates for ${1}"
+echo -e "\n====================================================\n\n"
 setup_env
 install_go
 install_cfssl
@@ -284,4 +266,6 @@ generate_application_certificates ${1} ${2} ${3} ${4}
 
 # # The intermediate certificates will be configured as environment variables to be consumed during platofrm deployment time
 # cat /usr/local/bootstrap/Outputs/IntermediateCAs/BootstrapCAs.sh
-echo -e "\nFinished Certification Process"
+echo -e "\n===================================================="
+echo -e "\nFinished creating certificates for ${1}"
+echo -e "\n====================================================\n\n\n\n"
