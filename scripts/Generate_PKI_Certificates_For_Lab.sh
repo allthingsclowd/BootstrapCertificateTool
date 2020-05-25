@@ -23,8 +23,7 @@ setup_env () {
     export CA=$CA_dir/hashistack-root-ca.pem
     export CA_KEY=$CA_dir/hashistack-root-ca-key.pem
     export Cert_Profiles=$conf_dir/certificate-profiles.json
-    export SIGNED_CA_CERT=$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem
-    export INT_CA_KEY=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem
+
   
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
     CIDR=`ip addr show ${IFACE} | awk '$2 ~ "192.168.9" {print $2}'`
@@ -189,6 +188,8 @@ generate_application_certificates () {
 
     echo "Checking for an Intermediate CA for ${1}"
     # Check if the Intermediate CA exists, if not create that first!
+    export SIGNED_CA_CERT=$Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem
+    export INT_CA_KEY=$Int_CA_dir/${1}/${1}-intermediate-ca-key.pem
     verify_or_generate_intermediate_ca ${1}
 
     echo "Start creating Leaf Certificates for ${1}"
