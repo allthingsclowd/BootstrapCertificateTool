@@ -1,9 +1,9 @@
 {
-    "CN": "Server",
+    "CN": "Peer",
     "hosts": [
         "127.0.0.1",
-        "server.global.bastion",
-        "1.2.3.4",
+        "",
+        "",
         "localhost",
         "*.hashistack.ie",
         "cert-server01.hashistack.ie",
