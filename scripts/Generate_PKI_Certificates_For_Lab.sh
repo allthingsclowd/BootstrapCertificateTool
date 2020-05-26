@@ -222,21 +222,17 @@ generate_application_certificates () {
     mkdir --parent /${ROOTCERTPATH}/${1}.d/pki/tls/private /${ROOTCERTPATH}/${1}.d/pki/tls/certs
     mv $Certs_dir/${1}/${1}-server.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
     mv $Certs_dir/${1}/${1}-server-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
-
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
-
     mv $Certs_dir/${1}/${1}-peer.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-peer.pem
     mv $Certs_dir/${1}/${1}-peer-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
-
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-peer.pem
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
-
     mv $Certs_dir/${1}/${1}-cli.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
     mv $Certs_dir/${1}/${1}-cli-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem
+    mv ${SIGNED_CA_CERT} /${ROOTCERTPATH}/ssl/certs/${1}-root-signed-intermediate-ca.pem
 
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem 
+    chmod -R 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
+    chmod -R 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
+    chmod -R 755 /${ROOTCERTPATH}/ssl/certs
+
+ 
 
     # if this is the final target system a user matching application name will exist
     
