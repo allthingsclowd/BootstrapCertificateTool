@@ -125,7 +125,7 @@ verify_or_generate_root_ca () {
     fi
 
     echo "Validate Root Certificate ${CA}"
-    verify_certificate ${CA_dir}/hashistack-root-ca
+    verify_certificate ${CA_dir}/hashistack-root-ca.pem
     
 }
 
@@ -171,7 +171,7 @@ verify_or_generate_intermediate_ca () {
  
 
     echo "Validate Intermediate Certificate for ${1}"
-    verify_certificate $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
+    verify_certificate $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem
 
 
 }
@@ -219,16 +219,17 @@ generate_application_certificates () {
 
     # placing certificates into directories for lab environment
     mkdir --parent /${ROOTCERTPATH}/${1}.d/pki/tls/private /${ROOTCERTPATH}/${1}.d/pki/tls/certs
-    mv $Certs_dir/${1}/${1}-server.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
-    mv $Certs_dir/${1}/${1}-server-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
-    mv $Certs_dir/${1}/${1}-peer.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-peer.pem
-    mv $Certs_dir/${1}/${1}-peer-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
-    mv $Certs_dir/${1}/${1}-cli.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
-    mv $Certs_dir/${1}/${1}-cli-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem
+    cp $Certs_dir/${1}/${1}-server.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
+    cp $Certs_dir/${1}/${1}-server-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
+    cp $Certs_dir/${1}/${1}-peer.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-peer.pem
+    cp $Certs_dir/${1}/${1}-peer-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
+    cp $Certs_dir/${1}/${1}-cli.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
+    cp $Certs_dir/${1}/${1}-cli-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem
 
     # install the public CA certificates both Root & Intermediate
     cp ${Int_CA_dir}/${1}/${1}-ca-chain.pem /usr/local/share/ca-certificates/${1}-ca-chain.crt
     update-ca-certificates
+    openssl rehash /etc/ssl/certs
     
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
@@ -241,9 +242,12 @@ generate_application_certificates () {
     fi
 
     echo "Validate Certificates for ${1}"
-    verify_certificate $Certs_dir/${1}/${1}-cli
-    verify_certificate $Certs_dir/${1}/${1}-peer
-    verify_certificate $Certs_dir/${1}/${1}-server    
+    verify_certificate $Certs_dir/${1}/${1}-cli.pem
+
+    verify_certificate $Certs_dir/${1}/${1}-peer.pem
+    verify_certificate_chain $Certs_dir/${1}/${1}-peer.pem
+    verify_certificate $Certs_dir/${1}/${1}-server.pem
+    verify_certificate_chain $Certs_dir/${1}/${1}-server.pem   
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
@@ -251,18 +255,26 @@ generate_application_certificates () {
 
 verify_certificate () {
 
-    if openssl x509 -in ${1}.pem -text -noout 2> /dev/null
+    if openssl x509 -in ${1} -text -noout 2> /dev/null
     then
-        echo "Success: Valid OpenSSL Certificate Created ${1}.pem"
-        if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/${1}-ca-chain.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem -text -noout 2> /dev/null
-        then
-            echo "Certificate Chain Validated Successfully"
-        else
-            echo "Failed to validate certificate chain"
-        fi
+        echo "Success: Valid OpenSSL Certificate Created ${1}"
     else
-        echo "Error: Certificate Created is NOT Valid ${1}.pem"
+        echo "Error: Certificate Created is NOT Valid ${1}"
+        exit 1
     fi
+}
+
+verify_certificate_chain () {
+
+
+    if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/ca-certificates.crt ${1} 2> /dev/null
+    then
+        echo "Certificate Chain Validated Successfully for ${1}"
+    else
+        echo "Failed to validate certificate chain for ${1}"
+        exit 1
+    fi
+
 }
 
 echo -e "\n===================================================="
