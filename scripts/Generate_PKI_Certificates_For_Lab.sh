@@ -240,6 +240,7 @@ generate_application_certificates () {
     
     # if this is the final target system a user matching application name will exist
     if id -u "${1}" >/dev/null 2>&1; then
+        echo -e "\nSet Certificate owner  ${1}:${1} /${ROOTCERTPATH}/${1}.d\n"
         chown -R ${1}:${1} /${ROOTCERTPATH}/${1}.d
     fi
 
