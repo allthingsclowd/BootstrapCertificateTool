@@ -242,11 +242,11 @@ generate_application_certificates () {
 
     echo "Validate Certificates for ${1}"
     verify_certificate $Certs_dir/${1}/${1}-cli.pem
-    verify_certificate_chain $Certs_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-cli.pem
+    # verify_certificate_chain $Int_CA_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-cli.pem
     verify_certificate $Certs_dir/${1}/${1}-peer.pem
-    verify_certificate_chain $Certs_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-peer.pem
+    verify_certificate_chain $Int_CA_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-peer.pem
     verify_certificate $Certs_dir/${1}/${1}-server.pem
-    verify_certificate_chain $Certs_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-server.pem   
+    verify_certificate_chain $Int_CA_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-server.pem   
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
@@ -266,7 +266,7 @@ verify_certificate () {
 verify_certificate_chain () {
 
 
-    if openssl verify -verbose -purpose sslserver -CAfile ${1} ${2} 2> /dev/null
+    if openssl verify -verbose -purpose sslserver -CApath /usr/local/share/ca-certificates/ ${2} 2> /dev/null
     then
         echo "Certificate Chain Validated Successfully for ${2}"
     else
