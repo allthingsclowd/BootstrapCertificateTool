@@ -37,7 +37,9 @@ setup_env () {
         ROOTCERTPATH=etc
     fi
 
-    export ROOTCERTPATH 
+    export ROOTCERTPATH
+
+    CERTPASSCODE="${CERTPASSCODE:-bananas}"
 
 }
 
