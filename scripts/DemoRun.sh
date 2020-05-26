@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export BootStrapCertTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.4/scripts/Generate_PKI_Certificates_For_Lab.sh"
+export BootStrapCertTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.6/scripts/Generate_PKI_Certificates_For_Lab.sh"
 
 #export BootStrapCertTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/AdjustNamingConvention/scripts/Generate_PKI_Certificates_For_Lab.sh"
 
