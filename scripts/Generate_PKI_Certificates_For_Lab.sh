@@ -125,7 +125,7 @@ verify_or_generate_root_ca () {
     fi
 
     echo "Validate Root Certificate ${CA}"
-    verify_certificate ${CA_dir}/hashistack-root-ca
+    verify_certificate ${CA_dir}/hashistack-root-ca.pem
     
 }
 
@@ -171,7 +171,7 @@ verify_or_generate_intermediate_ca () {
  
 
     echo "Validate Intermediate Certificate for ${1}"
-    verify_certificate $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
+    verify_certificate $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem
 
 
 }
@@ -241,12 +241,12 @@ generate_application_certificates () {
     fi
 
     echo "Validate Certificates for ${1}"
-    verify_certificate $Certs_dir/${1}/${1}-cli
-    verify_certificate_chain ${1} $Certs_dir/${1}/${1}-cli
-    verify_certificate $Certs_dir/${1}/${1}-peer
-    verify_certificate_chain ${1} $Certs_dir/${1}/${1}-peer
-    verify_certificate $Certs_dir/${1}/${1}-server
-    verify_certificate_chain ${1} $Certs_dir/${1}/${1}-server   
+    verify_certificate $Certs_dir/${1}/${1}-cli.pem
+    verify_certificate_chain $Certs_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-cli.pem
+    verify_certificate $Certs_dir/${1}/${1}-peer.pem
+    verify_certificate_chain $Certs_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-peer.pem
+    verify_certificate $Certs_dir/${1}/${1}-server.pem
+    verify_certificate_chain $Certs_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-server.pem   
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
@@ -254,11 +254,11 @@ generate_application_certificates () {
 
 verify_certificate () {
 
-    if openssl x509 -in ${1}.pem -text -noout 2> /dev/null
+    if openssl x509 -in ${1} -text -noout 2> /dev/null
     then
-        echo "Success: Valid OpenSSL Certificate Created ${1}.pem"
+        echo "Success: Valid OpenSSL Certificate Created ${1}"
     else
-        echo "Error: Certificate Created is NOT Valid ${1}.pem"
+        echo "Error: Certificate Created is NOT Valid ${1}"
         exit 1
     fi
 }
@@ -266,11 +266,11 @@ verify_certificate () {
 verify_certificate_chain () {
 
 
-    if openssl verify -verbose -purpose sslserver -CAfile ${1}-ca-chain.pem ${2}-server.pem 2> /dev/null
+    if openssl verify -verbose -purpose sslserver -CAfile ${1} ${2} 2> /dev/null
     then
-        echo "Certificate Chain Validated Successfully for ${1}"
+        echo "Certificate Chain Validated Successfully for ${2}"
     else
-        echo "Failed to validate certificate chain for ${1}"
+        echo "Failed to validate certificate chain for ${2}"
         exit 1
     fi
 
