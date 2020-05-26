@@ -153,6 +153,10 @@ verify_or_generate_intermediate_ca () {
         
         ls -al ${Int_CA_dir}/${1}/
 
+        # merge root and intermediate certificates to complete chain for verification
+
+        cat ${CA_dir}/hashistack-root-ca.pem ${Int_CA_dir}/${1}/${1}-root-signed-intermediate-ca.pem > ${Int_CA_dir}/${1}/${1}-ca-chain.pem
+
         echo "New Intermediate Certificate Authority successfully created ${1}"
         echo "Add CA to a sourced file as an environment variable for bootstrapping use later in Terraform Cloud deployments."
         echo "export ${1}_root_signed_intermediate_ca='`cat $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca.pem`'" >> ${Int_CA_dir}/BootstrapCAs.sh
@@ -213,11 +217,6 @@ generate_application_certificates () {
     cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=server $Certs_dir/${1}/${1}-server-config.json | cfssljson -bare $Certs_dir/${1}/${1}-server
     cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=peer $Certs_dir/${1}/${1}-peer-config.json | cfssljson -bare $Certs_dir/${1}/${1}-peer
 
-    echo "Validate Certificates for ${1}"
-    verify_certificate $Certs_dir/${1}/${1}-cli
-    verify_certificate $Certs_dir/${1}/${1}-peer
-    verify_certificate $Certs_dir/${1}/${1}-server
-
     # placing certificates into directories for lab environment
     mkdir --parent /${ROOTCERTPATH}/${1}.d/pki/tls/private /${ROOTCERTPATH}/${1}.d/pki/tls/certs
     mv $Certs_dir/${1}/${1}-server.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
@@ -226,22 +225,25 @@ generate_application_certificates () {
     mv $Certs_dir/${1}/${1}-peer-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
     mv $Certs_dir/${1}/${1}-cli.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
     mv $Certs_dir/${1}/${1}-cli-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem
-    # include the public CA certificates both Root & Intermediate
-    mv ${SIGNED_CA_CERT} /${ROOTCERTPATH}/ssl/certs/${1}-root-signed-intermediate-ca.pem
-    cp ${CA} /${ROOTCERTPATH}/ssl/certs/hashistack-root-ca.pem
 
-    chmod -R 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
-    chmod -R 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
-    chmod -R 755 /${ROOTCERTPATH}/ssl/certs
-
- 
-
-    # if this is the final target system a user matching application name will exist
+    # install the public CA certificates both Root & Intermediate
+    cp ${Int_CA_dir}/${1}/${1}-ca-chain.pem /usr/local/share/ca-certificates/${1}-ca-chain.crt
+    update-ca-certificates
     
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
+    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
+    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/
+    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/private
+    
+    # if this is the final target system a user matching application name will exist
     if id -u "${1}" >/dev/null 2>&1; then
         chown -R ${1}:${1} /${ROOTCERTPATH}/${1}.d
     fi
-    
+
+    echo "Validate Certificates for ${1}"
+    verify_certificate $Certs_dir/${1}/${1}-cli
+    verify_certificate $Certs_dir/${1}/${1}-peer
+    verify_certificate $Certs_dir/${1}/${1}-server    
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
@@ -252,6 +254,12 @@ verify_certificate () {
     if openssl x509 -in ${1}.pem -text -noout 2> /dev/null
     then
         echo "Success: Valid OpenSSL Certificate Created ${1}.pem"
+        if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/${1}-ca-chain.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem -text -noout 2> /dev/null
+        then
+            echo "Certificate Chain Validated Successfully"
+        else
+            echo "Failed to validate certificate chain"
+        fi
     else
         echo "Error: Certificate Created is NOT Valid ${1}.pem"
     fi
