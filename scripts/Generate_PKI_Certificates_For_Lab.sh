@@ -170,8 +170,8 @@ verify_or_generate_intermediate_ca () {
 
  
 
-    echo "Validate Intermediate Certificate Chain for ${1}"
-    verify_certificate ${Int_CA_dir}/${1}/${1}-ca-chain.pem
+    echo "Validate Intermediate Certificate for ${1}"
+    verify_certificate $Int_CA_dir/${1}/${1}-root-signed-intermediate-ca
 
 
 }
