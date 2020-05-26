@@ -2,7 +2,7 @@
 
 setup_env () {
 
-    set -x
+    set +x
 
     # Binary versions to check for
     [ -f /usr/local/bootstrap/var.env ] && {
