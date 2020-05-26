@@ -242,8 +242,11 @@ generate_application_certificates () {
 
     echo "Validate Certificates for ${1}"
     verify_certificate $Certs_dir/${1}/${1}-cli
+    verify_certificate_chain $Certs_dir/${1}/${1}-cli
     verify_certificate $Certs_dir/${1}/${1}-peer
-    verify_certificate $Certs_dir/${1}/${1}-server    
+    verify_certificate_chain $Certs_dir/${1}/${1}-peer
+    verify_certificate $Certs_dir/${1}/${1}-server
+    verify_certificate_chain $Certs_dir/${1}/${1}-server   
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
@@ -254,17 +257,23 @@ verify_certificate () {
     if openssl x509 -in ${1}.pem -text -noout 2> /dev/null
     then
         echo "Success: Valid OpenSSL Certificate Created ${1}.pem"
-        if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/${1}-ca-chain.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem 2> /dev/null
-        then
-            echo "Certificate Chain Validated Successfully"
-        else
-            echo "Failed to validate certificate chain"
-            exit 1
-        fi
     else
         echo "Error: Certificate Created is NOT Valid ${1}.pem"
         exit 1
     fi
+}
+
+verify_certificate_chain () {
+
+
+    if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/${1}-ca-chain.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem 2> /dev/null
+    then
+        echo "Certificate Chain Validated Successfully for ${1}"
+    else
+        echo "Failed to validate certificate chain for ${1}"
+        exit 1
+    fi
+
 }
 
 echo -e "\n===================================================="
