@@ -228,7 +228,7 @@ generate_application_certificates () {
     mv $Certs_dir/${1}/${1}-cli-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem
     # include the public CA certificates both Root & Intermediate
     mv ${SIGNED_CA_CERT} /${ROOTCERTPATH}/ssl/certs/${1}-root-signed-intermediate-ca.pem
-    cp ${CA} /${ROOTCERTPATH}/ssl/certs/${CA}
+    cp ${CA} /${ROOTCERTPATH}/ssl/certs/hashistack-root-ca.pem
 
     chmod -R 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
     chmod -R 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
