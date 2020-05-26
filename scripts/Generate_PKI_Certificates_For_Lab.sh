@@ -242,11 +242,11 @@ generate_application_certificates () {
 
     echo "Validate Certificates for ${1}"
     verify_certificate $Certs_dir/${1}/${1}-cli
-    verify_certificate_chain $Certs_dir/${1}/${1}-cli
+    verify_certificate_chain ${1} $Certs_dir/${1}/${1}-cli
     verify_certificate $Certs_dir/${1}/${1}-peer
-    verify_certificate_chain $Certs_dir/${1}/${1}-peer
+    verify_certificate_chain ${1} $Certs_dir/${1}/${1}-peer
     verify_certificate $Certs_dir/${1}/${1}-server
-    verify_certificate_chain $Certs_dir/${1}/${1}-server   
+    verify_certificate_chain ${1} $Certs_dir/${1}/${1}-server   
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
@@ -266,7 +266,7 @@ verify_certificate () {
 verify_certificate_chain () {
 
 
-    if openssl verify -verbose -purpose sslserver -CAfile ${1}-ca-chain.pem ${1}-server.pem 2> /dev/null
+    if openssl verify -verbose -purpose sslserver -CAfile ${1}-ca-chain.pem ${2}-server.pem 2> /dev/null
     then
         echo "Certificate Chain Validated Successfully for ${1}"
     else
