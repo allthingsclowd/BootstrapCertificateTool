@@ -254,14 +254,16 @@ verify_certificate () {
     if openssl x509 -in ${1}.pem -text -noout 2> /dev/null
     then
         echo "Success: Valid OpenSSL Certificate Created ${1}.pem"
-        if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/${1}-ca-chain.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem -text -noout 2> /dev/null
+        if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/${1}-ca-chain.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem 2> /dev/null
         then
             echo "Certificate Chain Validated Successfully"
         else
             echo "Failed to validate certificate chain"
+            exit 1
         fi
     else
         echo "Error: Certificate Created is NOT Valid ${1}.pem"
+        exit 1
     fi
 }
 
