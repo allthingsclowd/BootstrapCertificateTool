@@ -232,11 +232,11 @@ generate_application_certificates () {
     cp ${Int_CA_dir}/${1}/${1}-ca-chain.pem /usr/local/share/ca-certificates/${1}-ca-chain.crt
     update-ca-certificates
     openssl rehash /etc/ssl/certs
-    
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
-    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/
-    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/private
+
+    echo -e "\nSet Certificate file and directory permissions at /${ROOTCERTPATH}/${1}.d\n"
+    chmod -R 755 /${ROOTCERTPATH}/${1}.d
+    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/*
+    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/private/*
     
     # if this is the final target system a user matching application name will exist
     if id -u "${1}" >/dev/null 2>&1; then
