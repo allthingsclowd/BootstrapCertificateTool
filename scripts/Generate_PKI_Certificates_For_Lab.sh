@@ -266,7 +266,7 @@ verify_certificate () {
 verify_certificate_chain () {
 
 
-    if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/${1}-ca-chain.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem 2> /dev/null
+    if openssl verify -verbose -purpose sslserver -CAfile ${1}-ca-chain.pem ${1}-server.pem 2> /dev/null
     then
         echo "Certificate Chain Validated Successfully for ${1}"
     else
