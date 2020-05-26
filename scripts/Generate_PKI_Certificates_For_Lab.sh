@@ -229,6 +229,7 @@ generate_application_certificates () {
     # install the public CA certificates both Root & Intermediate
     cp ${Int_CA_dir}/${1}/${1}-ca-chain.pem /usr/local/share/ca-certificates/${1}-ca-chain.crt
     update-ca-certificates
+    openssl rehash /etc/ssl/certs
     
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
     chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
@@ -242,11 +243,11 @@ generate_application_certificates () {
 
     echo "Validate Certificates for ${1}"
     verify_certificate $Certs_dir/${1}/${1}-cli.pem
-    # verify_certificate_chain $Int_CA_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-cli.pem
+
     verify_certificate $Certs_dir/${1}/${1}-peer.pem
-    verify_certificate_chain $Int_CA_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-peer.pem
+    verify_certificate_chain $Certs_dir/${1}/${1}-peer.pem
     verify_certificate $Certs_dir/${1}/${1}-server.pem
-    verify_certificate_chain $Int_CA_dir/${1}/${1}-ca-chain.pem $Certs_dir/${1}/${1}-server.pem   
+    verify_certificate_chain $Certs_dir/${1}/${1}-server.pem   
 
     echo "Finished generating certificates for data centre with domain ${1}" 
 
@@ -266,11 +267,11 @@ verify_certificate () {
 verify_certificate_chain () {
 
 
-    if openssl verify -verbose -purpose sslserver -CApath /usr/local/share/ca-certificates/ ${2} 2> /dev/null
+    if openssl verify -verbose -purpose sslserver -CAfile /etc/ssl/certs/ca-certificates.crt ${1} 2> /dev/null
     then
-        echo "Certificate Chain Validated Successfully for ${2}"
+        echo "Certificate Chain Validated Successfully for ${1}"
     else
-        echo "Failed to validate certificate chain for ${2}"
+        echo "Failed to validate certificate chain for ${1}"
         exit 1
     fi
 
