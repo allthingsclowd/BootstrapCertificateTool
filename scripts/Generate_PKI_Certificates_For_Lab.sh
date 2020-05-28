@@ -235,10 +235,8 @@ generate_application_certificates () {
     update-ca-certificates
     openssl rehash /etc/ssl/certs
     
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/certs
-    chmod 755 /${ROOTCERTPATH}/${1}.d/pki/tls/private
-    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/certs/
-    chmod -R 644 /${ROOTCERTPATH}/${1}.d/pki/tls/private
+    echo -e "\nSet Certificate file (644) and directory (755)permissions at /${ROOTCERTPATH}/${1}.d\n"
+    chmod -R ug=rwX,o=rX /path
     
     # if this is the final target system a user matching application name will exist
     if id -u "${1}" >/dev/null 2>&1; then
