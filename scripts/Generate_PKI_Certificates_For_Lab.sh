@@ -236,7 +236,7 @@ generate_application_certificates () {
     openssl rehash /etc/ssl/certs
     
     echo -e "\nSet Certificate file (644) and directory (755)permissions at /${ROOTCERTPATH}/${1}.d\n"
-    chmod -R ug=rwX,o=rX /path
+    chmod -R ug=rwX,o=rX /${ROOTCERTPATH}/${1}.d
     
     # if this is the final target system a user matching application name will exist
     if id -u "${1}" >/dev/null 2>&1; then
