@@ -220,13 +220,15 @@ generate_application_certificates () {
     cfssl gencert -ca=${SIGNED_CA_CERT} -ca-key=${INT_CA_KEY} -config=$conf_dir/certificate-profiles.json -profile=peer $Certs_dir/${1}/${1}-peer-config.json | cfssljson -bare $Certs_dir/${1}/${1}-peer
 
     # placing certificates into directories for lab environment
-    mkdir --parent /${ROOTCERTPATH}/${1}.d/pki/tls/private /${ROOTCERTPATH}/${1}.d/pki/tls/certs
+    mkdir --parent /${ROOTCERTPATH}/${1}.d/pki/tls/private /${ROOTCERTPATH}/${1}.d/pki/tls/certs /${ROOTCERTPATH}/ssl/certs
     cp $Certs_dir/${1}/${1}-server.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-server.pem
     cp $Certs_dir/${1}/${1}-server-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-server-key.pem
     cp $Certs_dir/${1}/${1}-peer.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-peer.pem
     cp $Certs_dir/${1}/${1}-peer-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-peer-key.pem
     cp $Certs_dir/${1}/${1}-cli.pem /${ROOTCERTPATH}/${1}.d/pki/tls/certs/${1}-cli.pem
     cp $Certs_dir/${1}/${1}-cli-key.pem /${ROOTCERTPATH}/${1}.d/pki/tls/private/${1}-cli-key.pem
+    # required for travis ci testing
+    cp ${Int_CA_dir}/${1}/${1}-ca-chain.pem /${ROOTCERTPATH}/ssl/certs/${1}-ca-chain.pem
 
     # install the public CA certificates both Root & Intermediate
     cp ${Int_CA_dir}/${1}/${1}-ca-chain.pem /usr/local/share/ca-certificates/${1}-ca-chain.crt
