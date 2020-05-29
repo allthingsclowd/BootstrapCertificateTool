@@ -49,7 +49,9 @@ generate_user_certificates () {
     # Generate a new OpenSSH CA if one does not already exist
     [ ! -f $Int_CA_dir/${1}/${1}-client-ca ] && \
         ssh-keygen -t rsa -N '' -C HASHISTACK-${1}-CLIENT-CA -b 4096 -f $Int_CA_dir/${1}/${1}-client-ca && \
-        echo -e "\nNew SSH CLIENT CA created - $Int_CA_dir/${1}/${1}-client-ca" || \
+        echo -e "\nNew SSH CLIENT CA created - $Int_CA_dir/${1}/${1}-client-ca" && \
+        echo "export ${1}-client-ca='`cat $Int_CA_dir/${1}/${1}-client-ca`'" \
+        >> ${Int_CA_dir}/BootstrapCAs.sh || \
         echo -e "\nSSH CLIENT CA found - $Int_CA_dir/${1}/${1}-client-ca - this will be re-used."
     
     echo -e "\nNow copy ${1}_client_ca.pub to the target host servers (NOT the client servers) e.g. /etc/ssh/${1}-client-ca.pub"
@@ -66,9 +68,12 @@ generate_host_certificates () {
     echo -e "\n===================================================="
     echo -e "Check to see if SSH CA for ${1} already exists?"
     # Generate a new OpenSSH CA if one does not already exist
+    
     [ ! -f $Int_CA_dir/${1}/${1}-host-ca ] && \
         ssh-keygen -t rsa -N '' -C HASHISTACK-${1}-HOST-CA -b 4096 -f $Int_CA_dir/${1}/${1}-host-ca && \
-        echo -e "\nNew SSH CA created - $Int_CA_dir/${1}/${1}-host-ca" || \
+        echo -e "\nNew SSH CA created - $Int_CA_dir/${1}/${1}-host-ca" && \
+        echo "export ${1}-host-ca='`cat $Int_CA_dir/${1}/${1}-host-ca`'" \
+        >> ${Int_CA_dir}/BootstrapCAs.sh || \
         echo -e "\nSSH CA found - $Int_CA_dir/${1}/${1}-host-ca - this will be re-used."
     
     # Create new host keys if they don't already exist
