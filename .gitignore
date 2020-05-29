@@ -2,3 +2,4 @@ Outputs/RootCA/*
 Outputs/IntermediateCAs/*
 .vagrant
 PublicCerts_Protect/
+.bootstrap/*

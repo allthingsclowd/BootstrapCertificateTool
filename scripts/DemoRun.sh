@@ -9,4 +9,4 @@ wget -O - ${BootStrapCertTool} | bash -s nomad "server.global.nomad" "client.glo
 wget -O - ${BootStrapCertTool} | bash -s vault "server.global.vault" "client.global.vault" "1.2.3.4" 
 wget -O - ${BootStrapCertTool} | bash -s bastion "server.global.bastion" "client.global.bastion" "1.2.3.4"
 wget -O - ${BootStrapCertTool} | bash -s ssh "server.global.ssh" "client.global.ssh" "1.2.3.4" 
-
+wget -O - ${BootStrapCertTool} | bash -s wpc "server.global.wpc" "client.global.wpc" "1.2.3.4" 
