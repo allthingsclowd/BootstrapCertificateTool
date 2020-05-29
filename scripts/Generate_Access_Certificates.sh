@@ -77,16 +77,16 @@ generate_host_certificates () {
     push $Certs_dir
     # Generate new keys if required
     [ ! -f $Certs_dir/${1}_host_rsa_key ] && \
-        ssh-keygen -N '' -C HASHISTACK-${1}-HOST-KEY -t rsa -b 4096 -h -f $Certs_dir/${1}_host_rsa_key && \
-        echo -e "\nNew SSH keys created - $Certs_dir/${1}_host_rsa_key, $Certs_dir/${1}_host_rsa_key.pub" || \
-        echo -e "\nSSH Keys found - $Certs_dir/${1}_host_rsa_key, $Certs_dir/${1}_host_rsa_key.pub - these will be re-used."
+        ssh-keygen -N '' -C HASHISTACK-${1}-HOST-KEY -t rsa -b 4096 -h -f $Certs_dir/${1}/${1}_host_rsa_key && \
+        echo -e "\nNew SSH keys created - $Certs_dir/${1}/${1}_host_rsa_key, $Certs_dir/${1}/${1}_host_rsa_key.pub" || \
+        echo -e "\nSSH Keys found - $Certs_dir/${1}/${1}_host_rsa_key, $Certs_dir/${1}/${1}_host_rsa_key.pub - these will be re-used."
 
     echo -e "Sign the new keys for ${1}"
     # Sign the public key
-    [ ! -f $Certs_dir/${1}_host_rsa_key-cert.pub ] && \
-        ssh-keygen -s $Int_CA_dir/${1}/${1}-host-ca -I hashistack_server -h -V -5m:+52w $Certs_dir/${1}_host_rsa_key.pub && \
-        echo -e "\nNew SSH CERTIFICATE created - $Certs_dir/${1}_host_rsa_key-cert.pub" || \
-        echo -e "\nSSH CERTIFICATE found - $Certs_dir/${1}_host_rsa_key-cert.pub - this will be re-used."        
+    [ ! -f $Certs_dir/${1}/${1}_host_rsa_key-cert.pub ] && \
+        ssh-keygen -s $Int_CA_dir/${1}/${1}-host-ca -I hashistack_server -h -V -5m:+52w $Certs_dir/${1}/${1}_host_rsa_key.pub && \
+        echo -e "\nNew SSH CERTIFICATE created - $Certs_dir/${1}/${1}_host_rsa_key-cert.pub" || \
+        echo -e "\nSSH CERTIFICATE found - $Certs_dir/${1}/${1}_host_rsa_key-cert.pub - this will be re-used."        
 
     # Now copy ${1}_host_rsa_key.pub, ${1}_host_rsa_key-cert.pub and ${1}_host_rsa_key to the target system
     # e.g. /etc/ssh/.
@@ -107,21 +107,21 @@ generate_new_user_keys () {
     echo -e "Generate new ssh keys for user ${1}"
     push $Certs_dir
     # Generate new keys if required
-    ssh-keygen -N '' -C HASHISTACK-${1}-USER-KEY -t rsa -b 2048 -h -f $Certs_dir/${1}_user_rsa_key && \
-        echo -e "\nNew SSH keys created - $Certs_dir/${1}_user_rsa_key, $Certs_dir/${1}_user_rsa_key.pub"
+    ssh-keygen -N '' -C HASHISTACK-${1}-USER-KEY -t rsa -b 2048 -h -f $Certs_dir/${2}/${1}_${2}_user_rsa_key && \
+        echo -e "\nNew SSH keys created - $Certs_dir/${2}/${1}_${2}_user_rsa_key, $Certs_dir/${2}/${1}_${2}_user_rsa_key.pub"
 
     echo -e "Sign the new keys for user ${1}"
     # Sign the user key with the public key
-    ssh-keygen -s $Int_CA_dir/${1}/${1}-client-ca -I hashistack_server -n root,vagrant,graham,pi,grazzer -V -5:+52w -z 1 $Certs_dir/${1}_user_rsa_key.pub && \
-        echo -e "\nNew SSH CERTIFICATE created - $Certs_dir/${1}_user_rsa_key-cert.pub"      
+    ssh-keygen -s $Int_CA_dir/${1}/${1}-client-ca -I hashistack_server -n ${2},root,vagrant,graham,pi -V -5:+52w -z 1 $Certs_dir/${2}/${1}_${2}_user_rsa_key.pub && \
+        echo -e "\nNew SSH CERTIFICATE created - $Certs_dir/${2}/${1}_${2}_user_rsa_key-cert.pub"      
 
     # Now copy ${1}_host_rsa_key.pub, ${1}_host_rsa_key-cert.pub and ${1}_host_rsa_key to the target system
     # e.g. /etc/ssh/.
     # Configure the target system to present the host key when ssh is used
     # e.g. grep -qxF 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' /etc/ssh/sshd_config || echo 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' | sudo tee -a /etc/ssh/sshd_config
 
-    echo -e "\nNow copy $Certs_dir/${1}_user_rsa_key, $Certs_dir/${1}_user_rsa_key.pub & $Certs_dir/${1}_user_rsa_key-cert.pub to the client in the /home/someuser/.ssh directory"
-    echo -e "SSH Host CA and Key creation process for ${1} is has completed."
+    echo -e "\nNow copy $Certs_dir/${2}/${1}_${2}_user_rsa_key, $Certs_dir/${2}/${1}_${2}_user_rsa_key.pub & $Certs_dir/${2}/${1}_${2}_user_rsa_key-cert.pub to the client in the /home/someuser/.ssh directory"
+    echo -e "${2} SSH USER CA and Key creation process for ${1} is has completed."
 }
 
 echo -e "\n===================================================="
@@ -131,7 +131,7 @@ setup_env
 
 generate_host_certificates ${1}
 generate_user_certificates ${1}
-generate_new_user_keys ${2}
+generate_new_user_keys ${2} ${1}
 
 echo -e "\nFinished creating OpenSSH certificates lab setup"
 echo -e "\n====================================================\n\n\n\n"
