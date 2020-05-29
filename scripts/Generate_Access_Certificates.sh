@@ -11,19 +11,11 @@ setup_env () {
     }
 
     # Configure Directories
-    export conf_dir=/usr/local/bootstrap/conf/certificates
-    [ ! -d $conf_dir ] && mkdir -p $conf_dir
-    export CA_dir=/usr/local/bootstrap/.bootstrap/Outputs/RootCA
-    [ ! -d $CA_dir ] && mkdir -p $CA_dir
-    export Int_CA_dir=/usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs
-    [ ! -d $Int_CA_dir ] && mkdir -p $Int_CA_dir
-    export Certs_dir=/usr/local/bootstrap/.bootstrap/Outputs/Certificates
-    [ ! -d $Certs_dir ] && mkdir -p $Certs_dir 
+    export TMP_Int_CA_dir=$Int_CA_dir/${1}
+    [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir
+    export TMP_Int_CA_dir=$Certs_dir/${1}
+    [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir
     
-    export CA=$CA_dir/hashistack-root-ca.pem
-    export CA_KEY=$CA_dir/hashistack-root-ca-key.pem
-    export Cert_Profiles=$conf_dir/certificate-profiles.json
-
   
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
     CIDR=`ip addr show ${IFACE} | awk '$2 ~ "192.168.9" {print $2}'`
