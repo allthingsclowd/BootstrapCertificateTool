@@ -11,10 +11,8 @@ setup_env () {
     }
 
     # Configure Directories
-    export TMP_Int_CA_dir=$Int_CA_dir/${1}
-    [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir
-    export TMP_Int_CA_dir=$Certs_dir/${1}
-    [ ! -d $TMP_Int_CA_dir ] && mkdir -p $TMP_Int_CA_dir
+    [ ! -d /usr/local/bootstrap/.bootstrap/Outputs/Certificates/${1} ] && mkdir -p /usr/local/bootstrap/.bootstrap/Outputs/Certificates/${1}
+    [ ! -d /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/${1} ] && mkdir -p /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/${1}
     
   
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
