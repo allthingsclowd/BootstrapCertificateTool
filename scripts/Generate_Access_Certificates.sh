@@ -128,7 +128,8 @@ generate_new_user_keys () {
 echo -e "\n===================================================="
 echo -e "\nStarting to create OpenSSH certificates for lab setup"
 echo -e "\n====================================================\n\n"
-setup_env
+
+setup_env ${1}
 
 generate_host_certificates ${1}
 generate_user_certificates ${1}
