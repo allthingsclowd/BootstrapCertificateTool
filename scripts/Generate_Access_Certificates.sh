@@ -2,7 +2,7 @@
 
 setup_env () {
 
-    set +x
+    set -x
 
     # Binary versions to check for
     [ -f /usr/local/bootstrap/var.env ] && {
@@ -11,8 +11,17 @@ setup_env () {
     }
 
     # Configure Directories
-    [ ! -d /usr/local/bootstrap/.bootstrap/Outputs/Certificates/${1} ] && mkdir -p /usr/local/bootstrap/.bootstrap/Outputs/Certificates/${1}
-    [ ! -d /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/${1} ] && mkdir -p /usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs/${1}
+    export conf_dir=/usr/local/bootstrap/conf/certificates
+    [ ! -d $conf_dir ] && mkdir -p $conf_dir
+    export CA_dir=/usr/local/bootstrap/.bootstrap/Outputs/RootCA
+    [ ! -d $CA_dir ] && mkdir -p $CA_dir
+    export Int_CA_dir=/usr/local/bootstrap/.bootstrap/Outputs/IntermediateCAs
+    [ ! -d $Int_CA_dir ] && mkdir -p $Int_CA_dir
+    export Certs_dir=/usr/local/bootstrap/.bootstrap/Outputs/Certificates
+    [ ! -d $Certs_dir ] && mkdir -p $Certs_dir
+
+    [ ! -d $Certs_dir/${1} ] && mkdir -p $Certs_dir/${1}
+    [ ! -d $Int_CA_dir/${1} ] && mkdir -p $Int_CA_dir/${1}
     
   
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
