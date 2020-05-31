@@ -86,7 +86,7 @@ generate_new_ssh_host_keys () {
     chmod 600 /tmp/${1}/${1}-ssh-host-rsa-ca
     cat /tmp/${1}/${1}-ssh-host-rsa-ca
 
-    echo -e "Sign the new keys for ${2}"
+    echo -e "Sign the new keys for ${HOSTNAME}"
     # Sign the public key
     [ ! -f /etc/ssh/ssh_host_rsa_key-cert.pub ] && \
         ssh-keygen -s /tmp/${1}/${1}-ssh-host-rsa-ca -I ${HOSTNAME}_hashistack_server -h -n *.hashistack.ie,hashistack.ie,${HOSTNAME},${IP}${2} -V -5m:+52w /etc/ssh/ssh_host_rsa_key.pub && \
@@ -139,7 +139,7 @@ generate_new_user_keys () {
 
 
 
-    [ -f $Certs_dir/${1}-user-keys/${1}_${2}_user_rsa_key ] && rm -f $Certs_dir/${1}-user-keys/${1}_${2}_user_rsa_key*
+    [ -f /home/${2}/.ssh/id_rsa ] && rm -f /home/${2}/.ssh/id_rsa*
     # Generate new keys
     ssh-keygen -N '' -C ${1}-${2}-USER-KEY -t rsa -b 4096 -h -f /home/${2}/.ssh/id_rsa && \
         echo -e "\nNew SSH keys created - /home/${2}/.ssh/id_rsa, /home/${2}/.ssh/id_rsa.pub"
