@@ -8,7 +8,7 @@ export BootstrapSSHTool="https://raw.githubusercontent.com/allthingsclowd/Bootst
 
 # Generate OpenSSH Certs
 #wget -O - ${BootstrapSSHTool} | bash -s "ssh" "grazzer"
-wget -O - ${BootstrapSSHTool} | bash -s "bastion" "iac4me"
+wget -O - ${BootstrapSSHTool} | bash -s "hashistack" "iac4me" ",81.143.215.2"
 # Generate OpenSSL Certs
 #wget -O - ${BootStrapCertTool} | bash -s consul "server.node.global.consul" "client.node.global.consul" "1.2.3.4" 
 #wget -O - ${BootStrapCertTool} | bash -s nomad "server.global.nomad" "client.global.nomad" "1.2.3.4" 
