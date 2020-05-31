@@ -160,8 +160,8 @@ generate_new_user_keys () {
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
     rm -rf /tmp/${1}/${1}-ssh-user-rsa-ca
 
-    [ -d $Certs_dir/${1}-user-keys/${IP} ] || mkdir -p $Certs_dir/${1}-user-keys/${IP}
-    cp /home/${2}/.ssh/id_rsa* $Certs_dir/${1}-user-keys/${IP}/.
+    [ -d $Certs_dir/${1}-user-keys/${IP}/${2} ] || mkdir -p $Certs_dir/${1}-user-keys/${IP}/${2}
+    cp /home/${2}/.ssh/id_rsa* $Certs_dir/${1}-user-keys/${IP}/${2}/.
     echo -e "${1} SSH USER CA and Key creation process for ${2} is has completed."
     popd
 }
