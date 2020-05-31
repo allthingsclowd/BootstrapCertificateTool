@@ -81,7 +81,7 @@ generate_host_certificates () {
     pushd $Certs_dir
     # Generate new keys if required
     [ ! -f $Certs_dir/${1}_host_rsa_key ] && \
-        ssh-keygen -N '' -C HASHISTACK-${1}-HOST-KEY -t rsa -b 4096 -h -f $Certs_dir/${1}/${1}_host_rsa_key && \
+        ssh-keygen -N '' -C HASHISTACK-${1}-HOST-KEY -t rsa -b 4096 -h -n *.hashistack.ie,hashistack.ie -f $Certs_dir/${1}/${1}_host_rsa_key && \
         echo -e "\nNew SSH keys created - $Certs_dir/${1}/${1}_host_rsa_key, $Certs_dir/${1}/${1}_host_rsa_key.pub" || \
         echo -e "\nSSH Keys found - $Certs_dir/${1}/${1}_host_rsa_key, $Certs_dir/${1}/${1}_host_rsa_key.pub - these will be re-used."
 
