@@ -27,10 +27,11 @@ setup_env () {
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
     CIDR=`ip addr show ${IFACE} | awk '$2 ~ "192.168.9" {print $2}'`
     IP=${CIDR%%/24}
-    
+
+  
+    IP=${IP:-127.0.0.1}
     if [ "${TRAVIS}" == "true" ]; then
         ROOTCERTPATH=tmp
-        IP=${IP:-127.0.0.1}
         LEADER_IP=${IP}
     else
         ROOTCERTPATH=etc
