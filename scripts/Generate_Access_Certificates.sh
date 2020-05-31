@@ -100,8 +100,8 @@ generate_new_ssh_host_keys () {
 
     chmod -644 /etc/ssh/ssh_host_rs*
     
-    [ -d $Certs_dir/${1}-host-keys ] || mkdir -p $Certs_dir/${1}-host-keys
-    cp /etc/ssh/ssh_host_rsa_key* $Certs_dir/${1}-host-keys/.
+    [ -d $Certs_dir/${1}-host-keys/${HOSTNAME} ] || mkdir -p $Certs_dir/${1}-host-keys/${HOSTNAME}
+    cp /etc/ssh/ssh_host_rsa_key* $Certs_dir/${1}-host-keys/${HOSTNAME}/.
 
     echo -e "SSH Host Key creation process for ${1} is has completed."
     popd
@@ -150,8 +150,8 @@ generate_new_user_keys () {
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
     rm -rf /tmp/${1}/${1}-ssh-user-rsa-ca
 
-    [ -d $Certs_dir/${1}-user-keys ] || mkdir -p $Certs_dir/${1}-user-keys
-    cp /home/${2}/.ssh/id_rsa* $Certs_dir/${1}-user-keys/${IP}-${2}.
+    [ -d $Certs_dir/${1}-user-keys/${IP} ] || mkdir -p $Certs_dir/${1}-user-keys/${IP}
+    cp /home/${2}/.ssh/id_rsa* $Certs_dir/${1}-user-keys/${IP}/.
     echo -e "${1} SSH USER CA and Key creation process for ${2} is has completed."
     popd
 }
