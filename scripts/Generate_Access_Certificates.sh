@@ -80,7 +80,7 @@ generate_new_ssh_host_keys () {
         echo -e "\nSSH Keys found THIS IS AN ERROR!!!."
 
     # Check that CA signing key is available
-    [ -z ${1}_ssh_host_rsa_ca ] && echo "${1}_ssh_host_rsa_ca" > /tmp/${1}/${1}-ssh-host-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    [ ! -z ${1}_ssh_host_rsa_ca ] && echo "${1}_ssh_host_rsa_ca" > /tmp/${1}/${1}-ssh-host-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
     
     echo -e "Sign the new keys for ${2}"
     # Sign the public key
@@ -141,7 +141,7 @@ generate_new_user_keys () {
         echo -e "\nNew SSH keys created - /home/${2}/.ssh/id_rsa, /home/${2}/.ssh/id_rsa.pub"
 
     # Check that USER CA signing key is available
-    [ -z ${1}_ssh_user_rsa_ca ] && echo "${1}_ssh_user_rsa_ca" > /tmp/${1}/${1}-ssh-user-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    [ ! -z ${1}_ssh_user_rsa_ca ] && echo "${1}_ssh_user_rsa_ca" > /tmp/${1}/${1}-ssh-user-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
     echo -e "Sign the new keys for user ${2}"
     # Sign the user key with the public key
     ssh-keygen -s /tmp/${1}/${1}-ssh-user-rsa-ca -I ${1}-${2}-user-key -n ${2},grazzer,root,vagrant,graham,pi -V -5:+52w -z 1 /home/${2}/.ssh/id_rsa.pub && \
