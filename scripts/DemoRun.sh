@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 export BootStrapCertTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.12/scripts/Generate_PKI_Certificates_For_Lab.sh"
-export BootstrapSSHTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.12/scripts/Generate_Access_Certificates.sh"
+#export BootstrapSSHTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.12/scripts/Generate_Access_Certificates.sh"
 #export BootStrapCertTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/passwordDefault/scripts/Generate_PKI_Certificates_For_Lab.sh"
+export BootstrapSSHTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/host_fix/scripts/Generate_Access_Certificates.sh"
+
 
 # Generate OpenSSH Certs
 wget -O - ${BootstrapSSHTool} | bash -s "ssh" "grazzer"
