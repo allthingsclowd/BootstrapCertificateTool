@@ -42,27 +42,6 @@ setup_env () {
 
 }
 
-generate_user_certificates () {
-
-    echo -e "\n===================================================="
-    echo -e "Check to see if SSH CLIENT CA for ${1} already exists?"
-    # Generate a new OpenSSH CA if one does not already exist
-    [ ! -f $Int_CA_dir/${1}/${1}-client-ca ] && \
-        ssh-keygen -t rsa -N '' -C HASHISTACK-${1}-CLIENT-CA -b 4096 -f $Int_CA_dir/${1}/${1}-client-ca && \
-        echo -e "\nNew SSH CLIENT CA created - $Int_CA_dir/${1}/${1}-client-ca" && \
-        echo "export ${1}-client-ca='`cat $Int_CA_dir/${1}/${1}-client-ca`'" \
-        >> ${Int_CA_dir}/BootstrapCAs.sh || \
-        echo -e "\nSSH CLIENT CA found - $Int_CA_dir/${1}/${1}-client-ca - this will be re-used."
-    
-    echo -e "\nNow copy ${1}_client_ca.pub to the target host servers (NOT the client servers) e.g. /etc/ssh/${1}-client-ca.pub"
-    echo -e "\nConfigure the target system to accept the client-ca signed keys when ssh is used"
-    echo -e "\ne.g. grep -qxF 'TrustedUserCAKeys /etc/ssh/${1}-client-ca.pub' /etc/ssh/sshd_config || echo 'TrustedUserCAKeys /etc/ssh/${1}-client-ca.pub' | sudo tee -a /etc/ssh/sshd_config\n"
-    echo -e "\nNow create the user keys and certificates -  \n"
-    echo -e "\nNow sign the users (client) public ssh key, /home/someuser/.ssh/id_rsa.pub, as follows: Example ssh-keygen -s $Int_CA_dir/${1}/${1}-client-ca -I graham-dev -n root,vagrant,graham,pi -V -5:+52w -z 1 ~/.ssh/id_rsa.pub"
-    echo -e "SSH Client CA process for ${1} has completed."
-
-}
-
 generate_host_ca_signing_keys () {
     
     # ${1} - Environment that host ca signing key is gemerated for 
@@ -74,7 +53,7 @@ generate_host_ca_signing_keys () {
     [ ! -f $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca ] && \
         ssh-keygen -t rsa -N '' -C ${1}-SSH-HOST-RSA-CA -b 4096 -f $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca && \
         echo -e "\nNew SSH CA created - $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca" && \
-        echo "export ${1}-ssh-host-rsa-ca='`cat $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca`'" \
+        echo "export ${1}_ssh_host_rsa_ca='`cat $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca`'" \
         >> ${Int_CA_dir}/BootstrapCAs.sh || \
         echo -e "\nSSH CA found - $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca - this will be re-used."
     
@@ -100,7 +79,7 @@ generate_new_ssh_host_keys () {
         echo -e "\nSSH Keys found THIS IS AN ERROR!!!."
 
     # Check that CA signing key is available
-    [ -z ${1}-ssh-host-rsa-ca ] && echo "${1}-ssh-host-rsa-ca" > /tmp/${1}/${1}-ssh-host-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    [ -z ${1}_ssh_host_rsa_ca ] && echo "${1}_ssh_host_rsa_ca" > /tmp/${1}/${1}-ssh-host-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
     
     echo -e "Sign the new keys for ${2}"
     # Sign the public key
@@ -161,12 +140,15 @@ generate_new_user_keys () {
         echo -e "\nNew SSH keys created - /home/${2}/.ssh/id_rsa, /home/${2}/.ssh/id_rsa.pub"
 
     # Check that USER CA signing key is available
-    [ -z ${1}-ssh-user-rsa-ca ] && echo "${1}-ssh-user-rsa-ca" > /tmp/${1}/${1}-ssh-user-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    [ -z ${1}_ssh_user_rsa_ca ] && echo "${1}_ssh_user_rsa_ca" > /tmp/${1}/${1}-ssh-user-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
     echo -e "Sign the new keys for user ${2}"
     # Sign the user key with the public key
     ssh-keygen -s /tmp/${1}/${1}-ssh-user-rsa-ca -I ${1}-${2}-user-key -n ${2},grazzer,root,vagrant,graham,pi -V -5:+52w -z 1 /home/${2}/.ssh/id_rsa.pub && \
         echo -e "\nNew SSH CERTIFICATE created - /home/${2}/.ssh/id_rsa.pub"      
     chown -R ${2}:${2} /home/${2}/.ssh
+
+    # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
+    rm -rf /tmp/${1}/${1}-ssh-user-rsa-ca
 
     [ -d $Certs_dir/${1}-user-keys ] || mkdir -p $Certs_dir/${1}-user-keys
     cp /home/${2}/.ssh/id_rsa* $Certs_dir/${1}-user-keys/${IP}-${2}.
@@ -184,7 +166,7 @@ generate_user_ca_signing_keys () {
     [ ! -f $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca ] && \
         ssh-keygen -t rsa -N '' -C ${1}-SSH-USER-RSA-CA -b 4096 -f $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca && \
         echo -e "\nNew SSH CA created - $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca" && \
-        echo "export ${1}-ssh-user-rsa-ca='`cat $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca`'" \
+        echo "export ${1}_ssh_user_rsa_ca='`cat $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca`'" \
         >> ${Int_CA_dir}/BootstrapCAs.sh || \
         echo -e "\nSSH USER CA found - $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca - this will be re-used."
 
