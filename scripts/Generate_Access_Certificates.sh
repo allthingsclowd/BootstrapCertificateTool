@@ -81,7 +81,7 @@ generate_new_ssh_host_keys () {
 
     # Check that CA signing key is available
     HOSTCA=${1}_ssh_host_rsa_ca
-    [ ! -z ${1}_ssh_host_rsa_ca ] && mkdir -p /tmp/${1}/ && echo "${${HOSTCA}}" > /tmp/${1}/${1}-ssh-host-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    [ ! -z ${1}_ssh_host_rsa_ca ] && mkdir -p /tmp/${1}/ && eval 'echo "${'"${HOSTCA}"'}"' > /tmp/${1}/${1}-ssh-host-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
     
     chmod -600 /tmp/${1}/${1}-ssh-host-rsa-ca
     cat /tmp/${1}/${1}-ssh-host-rsa-ca
@@ -146,7 +146,7 @@ generate_new_user_keys () {
 
     # Check that USER CA signing key is available
     CLIENTCA=${1}_ssh_user_rsa_ca
-    [ ! -z ${1}_ssh_user_rsa_ca ] && mkdir -p /tmp/${1}/ && echo "${${CLIENTCA}}" > /tmp/${1}/${1}-ssh-user-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    [ ! -z ${1}_ssh_user_rsa_ca ] && mkdir -p /tmp/${1}/ && eval 'echo "${'"${CLIENT}"'}"' > /tmp/${1}/${1}-ssh-user-rsa-ca || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
     
     chmod -600 /tmp/${1}/${1}-ssh-user-rsa-ca
     cat /tmp/${1}/${1}-ssh-user-rsa-ca
