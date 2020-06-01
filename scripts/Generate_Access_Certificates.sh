@@ -41,6 +41,8 @@ setup_env () {
 
     CERTPASSCODE="${CERTPASSCODE:-bananas}"
 
+    source ${Int_CA_dir}/BootstrapCAs.sh
+
 }
 
 generate_new_ssh_host_keys () {
