@@ -156,6 +156,27 @@ generate_new_user_keys () {
     popd
 }
 
+configure_TrustedUserCAKeys () {
+    # ${1} - Environment that host ca signing key is gemerated for 
+
+    echo -e "\n===================================================="
+    echo -e "Move the TrustedUserCAKeys into Place"
+
+    [ -f /etc/ssh/${1}-ssh-user-rsa-ca.pub ] && rm -f /etc/ssh/${1}-ssh-user-rsa-ca.pub
+
+    cp $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca.pub /etc/ssh/${1}-ssh-user-rsa-ca.pub
+    echo -e "\nConfigure the target system to Trust user certificates signed by the ${1}-SSH-USER-RSA-CA key when ssh certificates are used"
+    grep -qxF "TrustedUserCAKeys /etc/ssh/${1}-ssh-user-rsa-ca.pub" /etc/ssh/sshd_config || echo "TrustedUserCAKeys /etc/ssh/${1}-ssh-user-rsa-ca.pub" | sudo tee -a /etc/ssh/sshd_config
+
+    chmod 644 /etc/ssh/${1}-ssh-user-rsa-ca.pub
+    echo -e "\nTrustedUserCAKeys configured."
+
+    echo -e "\n===================================================="
+
+}
+
+
+
 echo -e "\n===================================================="
 echo -e "\nStarting to create OpenSSH certificates for lab setup"
 echo -e "\n====================================================\n\n"
@@ -168,6 +189,7 @@ setup_env ${1}
 generate_new_ssh_host_keys ${1} ${3}
 create_ssh_user ${2}
 generate_new_user_keys ${1} ${2}
+configure_TrustedUserCAKeys ${1}
 
 echo -e "\nFinished creating OpenSSH certificates lab setup"
 echo -e "\n====================================================\n\n\n\n"
