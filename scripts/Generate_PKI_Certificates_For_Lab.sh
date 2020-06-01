@@ -232,7 +232,7 @@ generate_application_certificates () {
 
     # install the public CA certificates both Root & Intermediate
     cp ${Int_CA_dir}/${1}/${1}-ca-chain.pem /usr/local/share/ca-certificates/${1}-ca-chain.crt
-    [ ! -f /usr/local/share/ca-certificates/${1}-ca-chain.pem] && ln -s /usr/local/share/ca-certificates/${1}-ca-chain.crt /usr/local/share/ca-certificates/${1}-ca-chain.pem
+    [ ! -f /usr/local/share/ca-certificates/${1}-ca-chain.pem ] && ln -s /usr/local/share/ca-certificates/${1}-ca-chain.crt /usr/local/share/ca-certificates/${1}-ca-chain.pem
     update-ca-certificates
     openssl rehash /etc/ssl/certs
     
