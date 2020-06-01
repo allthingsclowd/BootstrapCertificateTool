@@ -87,7 +87,9 @@ generate_new_ssh_host_keys () {
     export SSH_HOST_RSA_PUBLIC_SIGNING_CA=`cat $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca.pub`
     grep -qxF "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" /etc/ssh/ssh_known_hosts || echo "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" | sudo tee -a /etc/ssh/ssh_known_hosts
 
-    chmod -644 /etc/ssh/ssh_host_rs*
+    chmod 700 /etc/ssh/ssh_host_rsa_key
+    chmod 644 /etc/ssh/ssh_host_rsa_key.pub
+    chmod 644 /etc/ssh/ssh_host_rsa_key-cert.pub
     
     [ -d $Certs_dir/${1}-host-keys/${HOSTNAME} ] || mkdir -p $Certs_dir/${1}-host-keys/${HOSTNAME}
     cp /etc/ssh/ssh_host_rsa_key* $Certs_dir/${1}-host-keys/${HOSTNAME}/.
@@ -101,10 +103,11 @@ create_ssh_user () {
   if ! grep ${1} /etc/passwd >/dev/null 2>&1; then
     
     echo "Creating ${1} user with ssh access"
-    sudo useradd --create-home --home-dir /home/${1} --shell /bin/bash ${1}
-    sudo usermod -aG sudo ${1}
-    sudo mkdir -p /home/${1}/.ssh
-    sudo chown -R ${1}:${1} /home/${1}/
+    useradd --create-home --home-dir /home/${1} --shell /bin/bash ${1}
+    usermod -aG sudo ${1}
+    mkdir -p /home/${1}/.ssh
+    chmod 700 /home/${1}/.ssh
+    chown -R ${1}:${1} /home/${1}/
 
   fi
 
@@ -139,6 +142,9 @@ generate_new_user_keys () {
     # Sign the user key with the public key
     ssh-keygen -s /tmp/${1}/${1}-ssh-user-rsa-ca -I ${1}-${2}-user-key -n ${2},grazzer,root,vagrant,graham,pi -V -5:+52w -z 1 /home/${2}/.ssh/id_rsa.pub && \
         echo -e "\nNew SSH CERTIFICATE created - /home/${2}/.ssh/id_rsa.pub"      
+    chmod 600 /home/${2}/.ssh/id_rsa
+    chmod 644 /home/${2}/.ssh/id_rsa.pub
+    chmod 644 /home/${2}/.ssh/id_rsa-cert.pub
     chown -R ${2}:${2} /home/${2}/.ssh
 
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
