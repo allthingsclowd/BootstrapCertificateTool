@@ -55,6 +55,8 @@ generate_host_ca_signing_keys () {
         echo -e "\nNew SSH HOST CA is being created - $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca" && \
         ssh-keygen -t rsa -N '' -C ${1}-SSH-HOST-RSA-CA -b 4096 -f $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca && \
         echo "export ${1}_ssh_host_rsa_ca='`cat $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca`'" \
+        >> ${Int_CA_dir}/BootstrapCAs.sh && \
+        echo "export ${1}_ssh_host_rsa_ca_pub='`cat $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca.pub`'" \
         >> ${Int_CA_dir}/BootstrapCAs.sh || \
         echo -e "\nSSH CA found - $Int_CA_dir/${1}/${1}-ssh-host-rsa-ca - this will be re-used."
     
@@ -74,6 +76,8 @@ generate_user_ca_signing_keys () {
         echo -e "\nNew SSH USER CA is being created - $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca" && \
         ssh-keygen -t rsa -N '' -C ${1}-SSH-USER-RSA-CA -b 4096 -f $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca && \
         echo "export ${1}_ssh_user_rsa_ca='`cat $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca`'" \
+        >> ${Int_CA_dir}/BootstrapCAs.sh  && \
+        echo "export ${1}_ssh_user_rsa_ca_pub='`cat $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca.pub`'" \
         >> ${Int_CA_dir}/BootstrapCAs.sh || \
         echo -e "\nSSH USER CA found - $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca - this will be re-used."
 

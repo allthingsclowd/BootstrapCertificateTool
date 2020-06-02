@@ -70,6 +70,13 @@ generate_new_ssh_host_keys () {
     chmod 600 /tmp/${1}/${1}-ssh-host-rsa-ca
     cat /tmp/${1}/${1}-ssh-host-rsa-ca
 
+    # Check that CA signing pub key is available
+    HOSTCAPUB=${1}_ssh_host_rsa_ca_pub
+    [ ! -z ${1}_ssh_host_rsa_ca_pub ] && mkdir -p /tmp/${1}/ && eval 'echo "${'"${HOSTCAPUB}"'}"' > /etc/ssh/${1}-ssh-host-rsa-ca.pub || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    
+    chmod 644 /etc/ssh/${1}-ssh-host-rsa-ca.pub
+
+
     echo -e "Sign the new keys for ${HOSTNAME}"
     # Sign the public key
     [ ! -f /etc/ssh/ssh_host_rsa_key-cert.pub ] && \
@@ -163,6 +170,13 @@ configure_TrustedUserCAKeys () {
     echo -e "Move the TrustedUserCAKeys into Place"
 
     [ -f /etc/ssh/${1}-ssh-user-rsa-ca.pub ] && rm -f /etc/ssh/${1}-ssh-user-rsa-ca.pub
+
+    # Check that USER CA signing key is available
+    CLIENTCAPUB=${1}_ssh_user_rsa_ca_pub
+    [ ! -z ${1}_ssh_user_rsa_ca_pub ] && eval 'echo "${'"${CLIENTCAPUB}"'}"' > /etc/ssh/${1}-ssh-user-rsa-ca.pub || echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+    
+    chmod 644 /etc/ssh/${1}-ssh-user-rsa-ca.pub
+    cat /etc/ssh/${1}-ssh-user-rsa-ca.pub
 
     cp $Int_CA_dir/${1}/${1}-ssh-user-rsa-ca.pub /etc/ssh/${1}-ssh-user-rsa-ca.pub
     echo -e "\nConfigure the target system to Trust user certificates signed by the ${1}-SSH-USER-RSA-CA key when ssh certificates are used"
