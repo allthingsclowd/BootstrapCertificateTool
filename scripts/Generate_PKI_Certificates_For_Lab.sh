@@ -28,6 +28,8 @@ setup_env () {
     IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
     CIDR=`ip addr show ${IFACE} | awk '$2 ~ "192.168.9" {print $2}'`
     IP=${CIDR%%/24}
+
+    IPS=`hostname -I | sed 's/ /,/g' | sed 's/,*$//g'`
     
     if [ "${TRAVIS}" == "true" ]; then
         ROOTCERTPATH=tmp

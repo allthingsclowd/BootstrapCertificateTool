@@ -24,9 +24,7 @@ setup_env () {
     [ ! -d $Int_CA_dir/${1} ] && mkdir -p $Int_CA_dir/${1}
     
   
-    IFACE=`route -n | awk '$1 == "192.168.9.0" {print $8;exit}'`
-    CIDR=`ip addr show ${IFACE} | awk '$2 ~ "192.168.9" {print $2}'`
-    IP=${CIDR%%/24}
+    IPS=`hostname -I | sed 's/ /,/g' | sed 's/,*$//g'`
 
   
     IP=${IP:-127.0.0.1}
@@ -59,7 +57,7 @@ generate_new_ssh_host_keys () {
 
     # create new host keys
     [ ! -f /etc/ssh/ssh_host_rsa_key ] && \
-        ssh-keygen -N '' -C ${HOSTNAME}-${1}-SSH-HOST-RSA-KEY -t rsa -b 4096 -h -n *.hashistack.ie,hashistack.ie,${HOSTNAME},${IP}${2} -f /etc/ssh/ssh_host_rsa_key && \
+        ssh-keygen -N '' -C ${HOSTNAME}-${1}-SSH-HOST-RSA-KEY -t rsa -b 4096 -h -n *.hashistack.ie,hashistack.ie,127.0.0.1,${HOSTNAME},${IPS}${2} -f /etc/ssh/ssh_host_rsa_key && \
         echo -e "\nNew SSH keys created - /etc/ssh/ssh_host_rsa_key, /etc/ssh/ssh_host_rsa_key.pub" || \
         echo -e "\nSSH Keys found THIS IS AN ERROR!!!."
 
@@ -80,7 +78,7 @@ generate_new_ssh_host_keys () {
     echo -e "Sign the new keys for ${HOSTNAME}"
     # Sign the public key
     [ ! -f /etc/ssh/ssh_host_rsa_key-cert.pub ] && \
-        ssh-keygen -s /tmp/${1}/${1}-ssh-host-rsa-ca -I ${HOSTNAME}_hashistack_server -h -n *.hashistack.ie,hashistack.ie,${HOSTNAME},${IP}${2} -V -5m:+52w /etc/ssh/ssh_host_rsa_key.pub && \
+        ssh-keygen -s /tmp/${1}/${1}-ssh-host-rsa-ca -I ${HOSTNAME}_hashistack_server -h -n *.hashistack.ie,hashistack.ie,127.0.0.1,${HOSTNAME},${IPS}${2} -V -5m:+52w /etc/ssh/ssh_host_rsa_key.pub && \
         echo -e "\nNew SIGNED SSH CERTIFICATE created - /etc/ssh/ssh_host_rsa_key-cert.pub" || \
         echo -e "\nSSH CERTIFICATE found THIS IS AN ERROR!!!."        
 
