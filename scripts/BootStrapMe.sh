@@ -62,28 +62,4 @@ while getopts "rcdRCDZn:" options; do
 done
 
 
-
-
-
-
-if [ "$NAME" = "" ]; then                      
-  STRING="Hi!"                                 
-else                                           
-  STRING="Hi, $NAME!"                          
-fi
-COUNT=1                                        
-while [ $COUNT -le $TIMES ]; do             
-                                            
-  echo $STRING                              
-  let COUNT+=1                              
-done
-
-
-
-
-
-
-
-
-
 exit 0                                         # Exit normally.
