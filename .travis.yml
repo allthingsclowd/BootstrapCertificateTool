@@ -18,6 +18,7 @@ global:
 before_script:
   - sudo rsync -az ${TRAVIS_BUILD_DIR}/ /usr/local/bootstrap/
   - sudo chmod -R 777 /usr/local/bootstrap/scripts
+  - sudo bash /usr/local/bootstrap/scripts/install_base_packages.sh
 script:
   - source /usr/local/bootstrap/var.env
   - inspec exec --chef-license=accept Bash-Functional-Test
