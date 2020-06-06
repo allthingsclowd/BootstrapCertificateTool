@@ -22,5 +22,4 @@ before_script:
   – sudo bash -c "echo 1 | /usr/local/bootstrap/scripts/BootStrapMe.sh -Z"
 script:
   - source /usr/local/bootstrap/var.env
-  - sudo bash -c "/usr/local/bootstrap/scripts/BootStrapMe.sh -Z"
-  – sudo bash -c "/usr/local/bootstrap/scripts/BootStrapMe.sh -B"
+  - inspec exec --chef-license=accept Bash-Functional-Test

@@ -1,0 +1,11 @@
+name: Bash-Functional-Tests
+title: InSpec Profile
+maintainer: Graham
+copyright: Graham
+copyright_email: graham@allthingscloud.eu
+license: Apache-2.0
+summary: Implementation of an InSpec profile to validate the script in this repo - BootStrapMe.sh
+version: 0.0.1
+supports:
+  platform: os
+  
