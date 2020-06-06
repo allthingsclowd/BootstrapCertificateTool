@@ -61,6 +61,16 @@ nuke_everything() {
     echo -e "Failed to delete ${baseDir}/${defaultRoot}/n"
 
 }
+
+# Initialise SSH CA directory
+ssh_init() {
+
+  echo -e "Starting SSH Root Certificate Authority Initialisation Process"
+  [ -d "${baseDir}/${defaultRoot}/${NAME}" ] && \
+    echo -e "Directory ${baseDir}/${defaultRoot}/${defaultSSH}/${NAME} has been found and will be re-used./n" || \
+    mkdir -p ${baseDir}/${defaultRoot}/${defaultSSH}/${NAME}; echo -e "Created ${baseDir}/${defaultRoot}/${defaultSSH}/${NAME}"
+
+}
 # Process all the commandline inputs using BASH getopts - not to be confused with OS getopt
 while getopts "rcdRCDZn:" options; do              
                                               
@@ -107,6 +117,7 @@ while getopts "rcdRCDZn:" options; do
   esac
 done
 
+[ "${SSHINIT}" -eq "TRUE" ] && [ ! "${NAME}" -eq "" ] && ssh_init
+  
 
-
-exit 0                                         # Exit normally.
+exit 0                                        

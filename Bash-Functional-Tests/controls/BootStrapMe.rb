@@ -46,3 +46,18 @@ control 'verify-nuke-option-Z-cancel' do
     its('exit_status') { should eq 1 }
   end
 end
+
+control 'verify-ssh-initialise-option-c' do                      
+  impact 1.0                                
+  title 'Option -c -n <ssh root ca name>'
+  desc 'verify option -c (create new root CA) is working.'
+  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -c -n Bananas') do
+    its('exit_status') { should eq 1 }
+  end
+
+  describe file('/usr/local/bootstrap/.bootstrap/SSH/ROOTCAS/Bananas') do
+    it { should exist }
+  end
+end
+
+
