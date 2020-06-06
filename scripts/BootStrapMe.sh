@@ -24,7 +24,7 @@ SSHDELETE="FALSE"
 SSLDELETE="FALSE"
 
 # Constants - FILE PATHS
-readonly BASEDIR="/usr/local/bootstrap"
+readonly baseDir="/usr/local/bootstrap"
 readonly defaultRoot=".bootstrap"
 readonly defaultSSH="SSH"
 readonly defaultSSL="SSL"
