@@ -16,7 +16,6 @@
 
 # Initialise some variables that capture the command line inputs
 NAME=""
-#NUKE="FALSE"
 SSHINIT="FALSE"
 SSLINIT="FALSE"
 SSHRESET="FALSE"
@@ -25,6 +24,7 @@ SSHDELETE="FALSE"
 SSLDELETE="FALSE"
 
 # Constants - FILE PATHS
+readonly BASEDIR="/usr/local/bootstrap"
 readonly defaultRoot=".bootstrap"
 readonly defaultSSH="SSH"
 readonly defaultSSL="SSL"
@@ -54,7 +54,11 @@ exit_abnormal() {
 # Delete EVERYTHING!!!!!
 nuke_everything() {
 
-  echo "BANG!!!"
+  # if the defaultRoot directory exists (-d) then delete it forcefully
+  [ -d "${baseDir}/${defaultRoot}" ] && \
+    rm -rf ${baseDir}/${defaultRoot} && \
+    echo -e "Successfully removed ALL certificates by deleting ${baseDir}/${defaultRoot}/n" || \
+    echo -e "Failed to delete ${baseDir}/${defaultRoot}/n"
 
 }
 # Process all the commandline inputs using BASH getopts - not to be confused with OS getopt
