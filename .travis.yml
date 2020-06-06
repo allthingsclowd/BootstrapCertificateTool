@@ -21,4 +21,4 @@ before_script:
   - sudo bash /usr/local/bootstrap/scripts/install_base_packages.sh
 script:
   - source /usr/local/bootstrap/var.env
-  - inspec exec --chef-license=accept Bash-Functional-Test
+  - inspec exec --chef-license=accept Bash-Functional-Tests
