@@ -63,6 +63,10 @@ control 'verify-ssh-initialise-option-c' do
     its('exit_status') { should eq 0 }
   end
 
+  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -c -n Bananas') do
+    its('stdout') { should match /found/ }
+  end
+
 end
 
 #control 'verify-ssl-initialise-option-c' do                      

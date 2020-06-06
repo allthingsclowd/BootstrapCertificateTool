@@ -66,25 +66,28 @@ nuke_everything() {
 ssh_init() {
 
     local tmpDir=${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}
+    local bootStrapFile=${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
+    local caFile=${tmpDir}/${NAME}-ssh-rsa-ca
+    
     echo -e "Starting SSH Root Certificate Authority Initialisation Process"
     
-    [ -d "${tmpDir}" ] && \
-      echo -e "Directory ${tmpDir} has been found and will be re-used./n" || \
-      mkdir -p ${tmpDir}; echo -e "Created ${tmpDir}"
+    # if there's an existing S{NAME} CA then re-use it
+    [ -f "${caFile}" ] && \
+      echo -e "CA ${caFile} has been found and will be re-used./n" && \
+      return
     
-    echo -e "Check to see if a SSH CA KEY for ${tmpDir} already exists?"
+    echo -e "Create SSH CA KEY for ${tmpDir}"
     # Generate a new OpenSSH CA if one does not already exist
     
-    [ ! -f ${tmpDir}/${NAME}-ssh-rsa-ca ] && \
-        echo -e "\nNew SSH HOST CA is being created - ${tmpDir}/${NAME}-ssh-rsa-ca" && \
-        ssh-keygen -t rsa -N '' -C ${NAME}-SSH-RSA-CA -b 4096 -f ${tmpDir}/${NAME}-ssh-rsa-ca && \
-        echo "export ${NAME}_ssh_rsa_ca='`cat ${tmpDir}/${NAME}-ssh-rsa-ca`'" \
-        >> ${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh && \
-        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${tmpDir}/${NAME}-ssh-rsa-ca.pub`'" \
-        >> ${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh || \
-        echo -e "\nSSH CA found - ${tmpDir}/${NAME}-ssh-rsa-ca - this will be re-used."
+    [ ! -f ${caFile} ] && \
+        echo -e "\nA New SSH HOST CA is being created - ${caFile}" && \
+        ssh-keygen -t rsa -N '' -C ${NAME}-SSH-RSA-CA -b 4096 -f ${caFile} && \
+        echo "export ${NAME}_ssh_rsa_ca='`cat ${caFile}`'" \
+        >> ${bootStrapFile} && \
+        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${caFile}.pub`'" \
+        >> ${bootStrapFile}
     
-    [ -f ${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh ] && source $${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
+    [ -f ${bootStrapFile} ] && source ${bootStrapFile}
 
     echo -e "SSH Root Certificate Authority Initialisation Process Complete"
 
