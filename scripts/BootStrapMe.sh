@@ -65,10 +65,28 @@ nuke_everything() {
 # Initialise SSH CA
 ssh_init() {
 
-  echo -e "Starting SSH Root Certificate Authority Initialisation Process"
-  [ -d "${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}" ] && \
-    echo -e "Directory ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME} has been found and will be re-used./n" || \
-    mkdir -p ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}; echo -e "Created ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}"
+    local tmpDir=${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}
+    echo -e "Starting SSH Root Certificate Authority Initialisation Process"
+    
+    [ -d "${tmpDir}" ] && \
+      echo -e "Directory ${tmpDir} has been found and will be re-used./n" || \
+      mkdir -p ${tmpDir}; echo -e "Created ${tmpDir}"
+    
+    echo -e "Check to see if a SSH CA KEY for ${tmpDir} already exists?"
+    # Generate a new OpenSSH CA if one does not already exist
+    
+    [ ! -f ${tmpDir}/${NAME}-ssh-rsa-ca ] && \
+        echo -e "\nNew SSH HOST CA is being created - ${tmpDir}/${NAME}-ssh-rsa-ca" && \
+        ssh-keygen -t rsa -N '' -C ${NAME}-SSH-RSA-CA -b 4096 -f ${tmpDir}/${NAME}-ssh-rsa-ca && \
+        echo "export ${NAME}_ssh_rsa_ca='`cat ${tmpDir}/${NAME}-ssh-rsa-ca`'" \
+        >> ${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh && \
+        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${tmpDir}/${NAME}-ssh-rsa-ca.pub`'" \
+        >> ${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh || \
+        echo -e "\nSSH CA found - ${tmpDir}/${NAME}-ssh-rsa-ca - this will be re-used."
+    
+    [ -f ${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh ] && source $${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
+
+    echo -e "SSH Root Certificate Authority Initialisation Process Complete"
 
 }
 

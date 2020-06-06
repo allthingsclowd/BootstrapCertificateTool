@@ -58,12 +58,18 @@ control 'verify-ssh-initialise-option-c' do
   describe directory('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas') do
     it { should exist }
   end
+  
+  describe command('ssh-keygen -L -f /usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+    its('stdout') { should match /Valid/ }
+  end
+
 end
 
 control 'verify-ssl-initialise-option-c' do                      
   impact 1.0                                
   title 'Option -C -n <ssl root ca name>'
   desc 'verify option -c (create new SSL root CA) is working.'
+  
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -C -n Oranges') do
     its('exit_status') { should eq 0 }
   end
@@ -71,6 +77,11 @@ control 'verify-ssl-initialise-option-c' do
   describe directory('/usr/local/bootstrap/.bootstrap/CA/SSL/Oranges') do
     it { should exist }
   end
+  
+  describe command('ssh-keygen -L -f /usr/local/bootstrap/.bootstrap/CA/SSL/Oranges/ORANGES-ssh-rsa-ca.pub') do
+    its('stdout') { should match /Valid/ }
+  end
 end
+
 
 
