@@ -44,14 +44,17 @@ usage() {
   echo "Usage: ${0} -Z Nuke All Certificates!!!" 1>&2
 
 }
+
 # What to do on failure routine
 exit_abnormal() {                              
   usage
   exit 1
 }
 
+# Delete EVERYTHING!!!!!
 nuke_everything() {
 
+  echo "BANG!!!"
 
 }
 # Process all the commandline inputs using BASH getopts - not to be confused with OS getopt
