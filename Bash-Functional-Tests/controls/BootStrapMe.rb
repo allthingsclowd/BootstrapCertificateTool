@@ -50,12 +50,25 @@ end
 control 'verify-ssh-initialise-option-c' do                      
   impact 1.0                                
   title 'Option -c -n <ssh root ca name>'
-  desc 'verify option -c (create new root CA) is working.'
+  desc 'verify option -c (create new SSH root CA) is working.'
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -c -n Bananas') do
     its('exit_status') { should eq 0 }
   end
 
   describe directory('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas') do
+    it { should exist }
+  end
+end
+
+control 'verify-ssl-initialise-option-c' do                      
+  impact 1.0                                
+  title 'Option -C -n <ssl root ca name>'
+  desc 'verify option -c (create new SSL root CA) is working.'
+  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -C -n Oranges') do
+    its('exit_status') { should eq 0 }
+  end
+
+  describe directory('/usr/local/bootstrap/.bootstrap/CA/SSL/Oranges') do
     it { should exist }
   end
 end

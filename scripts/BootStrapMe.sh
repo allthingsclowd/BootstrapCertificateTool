@@ -62,7 +62,7 @@ nuke_everything() {
 
 }
 
-# Initialise SSH CA directory
+# Initialise SSH CA
 ssh_init() {
 
   echo -e "Starting SSH Root Certificate Authority Initialisation Process"
@@ -71,6 +71,17 @@ ssh_init() {
     mkdir -p ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}; echo -e "Created ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}"
 
 }
+
+# Initialise SSL CA
+ssl_init() {
+
+  echo -e "Starting SSL Root Certificate Authority Initialisation Process"
+  [ -d "${baseDir}/${defaultRoot}/${rootCA}/${defaultSSL}/${NAME}" ] && \
+    echo -e "Directory ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSL}/${NAME} has been found and will be re-used./n" || \
+    mkdir -p ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSL}/${NAME}; echo -e "Created ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSL}/${NAME}"
+
+}
+
 # Process all the commandline inputs using BASH getopts - not to be confused with OS getopt
 while getopts "rcdRCDZn:" options; do              
                                               
@@ -118,6 +129,7 @@ while getopts "rcdRCDZn:" options; do
 done
 
 [ "${SSHINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ] && ssh_init
+[ "${SSLINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ] && ssl_init
   
 
 exit 0                                        
