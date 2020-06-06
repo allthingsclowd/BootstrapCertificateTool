@@ -85,7 +85,7 @@ while getopts "rcdRCDZn:" options; do
       select yn in "Yes" "No"; 
       do
         case $yn in
-          Yes ) nuke_everything; break;;
+          Yes ) nuke_everything; exit 0;;
           No ) exit_abnormal;;
         esac
       done                       
