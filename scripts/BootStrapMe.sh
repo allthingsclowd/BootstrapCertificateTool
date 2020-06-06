@@ -117,7 +117,7 @@ while getopts "rcdRCDZn:" options; do
   esac
 done
 
-[ "${SSHINIT}" -eq "TRUE" ] && [ ! "${NAME}" -eq "" ] && ssh_init
+[ "${SSHINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ] && ssh_init
   
 
 exit 0                                        
