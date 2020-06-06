@@ -52,7 +52,7 @@ control 'verify-ssh-initialise-option-c' do
   title 'Option -c -n <ssh root ca name>'
   desc 'verify option -c (create new root CA) is working.'
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -c -n Bananas') do
-    its('exit_status') { should eq 1 }
+    its('exit_status') { should eq 0 }
   end
 
   describe file('/usr/local/bootstrap/.bootstrap/SSH/ROOTCAS/Bananas') do
