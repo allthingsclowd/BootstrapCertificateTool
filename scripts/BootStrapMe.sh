@@ -66,9 +66,9 @@ nuke_everything() {
 ssh_init() {
 
   echo -e "Starting SSH Root Certificate Authority Initialisation Process"
-  [ -d "${baseDir}/${defaultRoot}/${NAME}" ] && \
-    echo -e "Directory ${baseDir}/${defaultRoot}/${defaultSSH}/${NAME} has been found and will be re-used./n" || \
-    mkdir -p ${baseDir}/${defaultRoot}/${defaultSSH}/${NAME}; echo -e "Created ${baseDir}/${defaultRoot}/${defaultSSH}/${NAME}"
+  [ -d "${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}" ] && \
+    echo -e "Directory ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME} has been found and will be re-used./n" || \
+    mkdir -p ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}; echo -e "Created ${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}"
 
 }
 # Process all the commandline inputs using BASH getopts - not to be confused with OS getopt
