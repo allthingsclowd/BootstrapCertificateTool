@@ -18,8 +18,6 @@ global:
 before_script:
   - sudo rsync -az ${TRAVIS_BUILD_DIR}/ /usr/local/bootstrap/
   - sudo chmod -R 777 /usr/local/bootstrap/scripts
-  - sudo bash -c "echo 2 | /usr/local/bootstrap/scripts/BootStrapMe.sh -Z"
-  – sudo bash -c "echo 1 | /usr/local/bootstrap/scripts/BootStrapMe.sh -Z"
 script:
   - source /usr/local/bootstrap/var.env
   - inspec exec --chef-license=accept Bash-Functional-Test
