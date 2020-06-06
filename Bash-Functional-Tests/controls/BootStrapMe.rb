@@ -55,7 +55,7 @@ control 'verify-ssh-initialise-option-c' do
     its('exit_status') { should eq 0 }
   end
 
-  describe file('/usr/local/bootstrap/.bootstrap/SSH/ROOTCAS/Bananas') do
+  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas') do
     it { should exist }
   end
 end
