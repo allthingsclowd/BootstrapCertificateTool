@@ -180,20 +180,17 @@ generate_and_configure_new_host_keys() {
       chmod 644 /etc/ssh/ssh_host_rsa_key.pub
       chmod 644 /etc/ssh/ssh_host_rsa_key-cert.pub
 
-      echo -e "\nConfigure the target system to present the host key when ssh is used"
-      grep -qxF 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' /etc/ssh/sshd_config || echo 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' | sudo tee -a /etc/ssh/sshd_config
-      grep -qxF 'HostKey /etc/ssh/ssh_host_rsa_key' /etc/ssh/sshd_config || echo 'HostKey /etc/ssh/ssh_host_rsa_key' | sudo tee -a /etc/ssh/sshd_config
+      echo -e "\nConfigure the target system to present the host key when ssh is used"      
+      sed 's#HostCertificate.*#HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub#g' /etc/ssh/sshd_config
       
-      echo -e "***********DEBUG************"
-      cat /etc/ssh/sshd_config
+      sed 's#HostKey.*#HostKey /etc/ssh/ssh_host_rsa_key#g' /etc/ssh/sshd_config
       
       echo -e "\nConfigure the target system to also accept host keys from other certified systems - when acting as a client"
+      
       export SSH_HOST_RSA_PUBLIC_SIGNING_CA=`cat ${caFile}.pub.tmp`
-      grep -qxF "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" /etc/ssh/ssh_known_hosts || echo "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" | sudo tee -a /etc/ssh/ssh_known_hosts
+      sed 's#@cert-authority \*.*#@cert-authority \* '${SSH_HOST_RSA_PUBLIC_SIGNING_CA}'#g' /etc/ssh/ssh_known_hosts
+
     fi
-    
-    echo -e "***********DEBUG************"
-    cat /etc/ssh/ssh_known_hosts
     
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
     rm -rf ${caFile}.tmp
