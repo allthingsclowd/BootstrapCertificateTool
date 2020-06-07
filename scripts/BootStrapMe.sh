@@ -120,7 +120,11 @@ generate_and_configure_new_host_keys() {
         # load the signing keys into memory
         if [ -f "${bootStrapFile}" ]; then
           echo -e "Sourcing the signing keys"
+          env
           source ${bootStrapFile}
+          env
+          echo "${NAME}_ssh_rsa_ca AND ${NAME}_ssh_rsa_ca_pub"
+          
           if [ ! -z "${NAME}_ssh_rsa_ca" ] || [ ! -z "${NAME}_ssh_rsa_ca_pub" ]; then
             echo -e "BANG! No signing keys found in ${bootStrapFile} to commence bootstrap process"
             exit 1
