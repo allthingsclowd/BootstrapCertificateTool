@@ -115,6 +115,8 @@ generate_and_configure_new_host_keys() {
     echo -e "Generate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES"
     [ ! -d ${tmpDir} ] && mkdir -p ${tmpDir}
     
+    [ -f ${keyFile} ] && rm -rf ${keyFile}*
+    
     # create new host key
     ssh-keygen -N '' -C ${TARGETNAME}-SSH-HOST-RSA-KEY -t rsa \
                 -b 4096 -h \
