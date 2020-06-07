@@ -118,7 +118,7 @@ generate_and_configure_new_host_keys() {
     export caEnv=${NAME}_ssh_rsa_ca
     export caPubEnv=${NAME}_ssh_rsa_ca_pub
     env
-    if [[ ! -z "${!caEnv}" ]] || [[ ! -z "${!caPubEnv}" ]]; then
+    if [[ -z "${!caEnv}" ]] || [[ -z "${!caPubEnv}" ]]; then
         
         # load the signing keys into memory
         if [[ -f "${bootStrapFile}" ]]; then
@@ -128,7 +128,7 @@ generate_and_configure_new_host_keys() {
           env
           echo "${NAME}_ssh_rsa_ca AND ${NAME}_ssh_rsa_ca_pub"
           
-          if [[ ! -z "${!caEnv}" ]] || [[ ! -z "${!caPubEnv}" ]]; then
+          if [[ -z "${!caEnv}" ]] || [[ -z "${!caPubEnv}" ]]; then
             echo -e "BANG! No signing keys found in ${bootStrapFile} to commence bootstrap process"
             exit 1
           fi
