@@ -181,7 +181,7 @@ ssl_init() {
 }
 
 # Process all the commandline inputs using BASH getopts - not to be confused with OS getopt
-while getopts "rcdRCDZn:h:i:a:p:s" options; do              
+while getopts "rcdRCDZn:Hh:i:a:p:s" options; do              
                                               
   case "${options}" in   
     s)
