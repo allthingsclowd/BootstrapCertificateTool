@@ -58,6 +58,14 @@ control 'verify-ssh-initialise-option-c' do
   describe directory('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas') do
     it { should exist }
   end
+
+  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+    it { should exist }
+  end
+  
+  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca') do
+    it { should exist }
+  end 
   
   describe command('ssh-keygen -l -f /usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
     its('exit_status') { should eq 0 }
@@ -69,6 +77,15 @@ control 'verify-ssh-initialise-rerun' do
   impact 1.0                                
   title 'Already initialised? Then Stop!'
   desc 'verify option -c does not RESET the CA if one already exists'
+  
+  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+    it { should exist }
+  end
+  
+  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca') do
+    it { should exist }
+  end   
+  
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -c -n Bananas') do
     its('exit_status') { should eq 0 }
     its('stdout') { should match /found/ }
