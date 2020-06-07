@@ -68,7 +68,7 @@ control 'verify-ssh-initialise-option-c' do
     it { should exist }
   end 
   
-  describe command('ssh-keygen -l -f ' + base_dir + '/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+  describe command('ssh-keygen -l -f ' + base_dir + '/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
     its('exit_status') { should eq 0 }
   end
 
