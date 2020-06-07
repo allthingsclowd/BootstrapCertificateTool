@@ -63,12 +63,18 @@ control 'verify-ssh-initialise-option-c' do
     its('exit_status') { should eq 0 }
   end
 
+end
+
+control 'verify-ssh-initialise-rerun' do                      
+  impact 1.0                                
+  title 'Already initialised? Then Stop!'
+  desc 'verify option -c does not RESET the CA if one already exists'
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -c -n Bananas') do
+    its('exit_status') { should eq 0 }
     its('stdout') { should match /found/ }
   end
 
 end
-
 #control 'verify-ssl-initialise-option-c' do                      
 #  impact 1.0                                
 #  title 'Option -C -n <ssl root ca name>'
