@@ -115,7 +115,7 @@ control 'create-ssh-host-keys' do
             -a hashistack.ie,*.hashistack.ie \
             -p 8.8.8.8') do
     its('exit_status') { should eq 0 }
-    its('stdout') { should match /found/ }
+    its('stdout') { should match /completed/ }
   end
 
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
@@ -127,7 +127,7 @@ control 'create-ssh-host-keys' do
             -p 8.8.8.8 \
             -s') do
     its('exit_status') { should eq 0 }
-    its('stdout') { should match /found/ }
+    its('stdout') { should match /completed/ }
   end
 
 end
