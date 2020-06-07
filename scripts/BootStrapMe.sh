@@ -73,7 +73,7 @@ ssh_init() {
     
     # if there's an existing S{NAME} CA then re-use it
     [ -f "${caFile}" ] && \
-      echo -e "CA ${caFile} has been found and will be re-used./n" && \
+      echo -e "CA ${caFile} has been found and will be re-used.\n" && \
       return
     
     # Generate a new OpenSSH CA if one does not already exist

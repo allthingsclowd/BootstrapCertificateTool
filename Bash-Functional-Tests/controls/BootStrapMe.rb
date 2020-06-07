@@ -64,7 +64,7 @@ control 'verify-ssh-initialise-option-c' do
   end
 
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh -c -n Bananas') do
-    its('stdout') { should match /*found*/ }
+    its('stdout') { should match /found/ }
   end
 
 end
