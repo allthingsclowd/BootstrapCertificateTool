@@ -31,7 +31,6 @@ HOSTKEY="FALSE"
 SETKEY="FALSE"
 
 # Constants - FILE PATHS
-readonly baseDir="/usr/local/bootstrap"
 readonly defaultRoot=".bootstrap"
 readonly defaultSSH="SSH"
 readonly defaultSSL="SSL"
@@ -142,7 +141,7 @@ generate_and_configure_new_host_keys() {
         echo -e "\nNew SIGNED SSH CERTIFICATE created - ${keyFile}-cert.pub" || \
         echo -e "\nError signing ssh host key."        
 
-    if [ ! "${SETKEY}" == "FALSE" ] then
+    if [ ! "${SETKEY}" == "FALSE" ]; then
       
       # delete existing keys if present
       [ -f /etc/ssh/ssh_host_rsa_key ] && rm -f /etc/ssh/ssh_host_rsa_key /etc/ssh/ssh_host_rsa_key.pub /etc/ssh/ssh_host_rsa_key-cert.pub
