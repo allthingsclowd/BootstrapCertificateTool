@@ -12,4 +12,4 @@ attributes:
   - name: base_dir
     type: string
     description: 'Configure TRAVIS-CI Base Directory'
-    value: <%= ENV['TRAVIS_BASE_DIR'] %>  
+    value: <%= ENV["TRAVIS_BASE_DIR"] %>  
