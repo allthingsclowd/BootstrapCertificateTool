@@ -31,6 +31,7 @@ HOSTKEY="FALSE"
 SETKEY="FALSE"
 
 # Constants - FILE PATHS
+readonly baseDir="/usr/local/bootstrap"
 readonly defaultRoot=".bootstrap"
 readonly defaultSSH="SSH"
 readonly defaultSSL="SSL"
@@ -39,7 +40,7 @@ readonly intermediateCA="IntCA"
 readonly leafCerts="Leaf"
 readonly sshKeys="Key"
 
-[ ! -z ${TRAVIS} ] && readonly baseDir="${TRAVIS_BUILD_DIR}" || readonly baseDir="/usr/local/bootstrap"                                  
+#[ ! -z ${TRAVIS} ] && readonly baseDir="${TRAVIS_BUILD_DIR}" || readonly baseDir="/usr/local/bootstrap"                                  
 
 # Define the script usage instructions                                         
 usage() {                                      
