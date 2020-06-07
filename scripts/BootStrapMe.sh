@@ -129,10 +129,10 @@ generate_and_configure_new_host_keys() {
     # Check that CA signing key is available
     ( [ ! -z ${NAME}_ssh_rsa_ca ] && \
         mkdir -p ${caDir} && \
-        eval 'echo "${'"${NAME}_ssh_rsa_ca"'}"' > ${caFile}.tmp && \
+        eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp && \
         echo -e "***********DEBUG************" && \
-        echo "${'"${NAME}_ssh_rsa_ca"'}"  && \
-        echo ${NAME}_ssh_rsa_ca && \
+        echo "$"${NAME}_ssh_rsa_ca  && \
+        echo "$"${NAME}_ssh_rsa_ca && \
         ls -al ${caFile}.tmp  && \
         cat ${caFile}.tmp ) || \
     ( echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && \
@@ -143,9 +143,9 @@ generate_and_configure_new_host_keys() {
     # Check that CA signing pub key is available
     ( [ ! -z ${NAME}_ssh_rsa_ca_pub ] && \
         mkdir -p ${caDir} && \
-        eval 'echo "${'"${NAME}_ssh_rsa_ca_pub"'}"' > ${caFile}.pub.tmp && \ 
+        eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp && \ 
         echo -e "***********DEBUG************" && \
-        echo ${NAME}_ssh_rsa_ca_pub && \
+        echo "$"${NAME}_ssh_rsa_ca_pub && \
         cat ${caFile}.pub.tmp ) || \
     ( echo -e "\nSSH CA Public Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && \
         exit 1 )
