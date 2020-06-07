@@ -146,6 +146,18 @@ control 'create-ssh-host-keys' do
     its('exit_status') { should eq 0 }
   end
 
+  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
+            -H \
+            -n TOMATOES \
+            -h grazzer \
+            -i 192.168.9.11,192.168.9.4 \
+            -a hashistack.ie,*.hashistack.ie \
+            -p 8.8.8.8 \
+            -s') do
+    its('exit_status') { should eq 1 }
+    its('stdout') { should match /BANG/ }
+  end
+
 end
 
 
