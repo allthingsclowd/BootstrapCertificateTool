@@ -8,4 +8,8 @@ summary: Implementation of an InSpec profile to validate the script in this repo
 version: 0.0.1
 supports:
   platform: os
-  
+attributes:
+  - name: base_dir
+    type: string
+    description: 'Configure TRAVIS-CI Base Directory'
+    value: <%= ENV['TRAVIS_BASE_DIR'] %>  

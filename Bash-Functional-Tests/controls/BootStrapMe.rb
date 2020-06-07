@@ -3,6 +3,7 @@
 
 title 'Verify BootStrapMe.sh Options'
 
+base_dir = attribute('base_dir', value: '/usr/local/bootstrap', description: 'Configure working directory for Inspec tests in Travis-CI')
 
 control 'audit_installation_prerequisites' do
   impact 1.0
@@ -55,19 +56,19 @@ control 'verify-ssh-initialise-option-c' do
     its('exit_status') { should eq 0 }
   end
 
-  describe directory('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas') do
+  describe directory(base_dir + '/.bootstrap/CA/SSH/Bananas') do
     it { should exist }
   end
 
-  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+  describe file(base_dir + '/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
     it { should exist }
   end
   
-  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca') do
+  describe file(base_dir + '/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca') do
     it { should exist }
   end 
   
-  describe command('ssh-keygen -l -f /usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+  describe command('ssh-keygen -l -f ' + base_dir + '/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
     its('exit_status') { should eq 0 }
   end
 
@@ -78,11 +79,11 @@ control 'verify-ssh-initialise-rerun' do
   title 'Already initialised? Then Stop!'
   desc 'verify option -c does not RESET the CA if one already exists'
   
-  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+  describe file(base_dir + '/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
     it { should exist }
   end
   
-  describe file('/usr/local/bootstrap/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca') do
+  describe file(base_dir + '/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca') do
     it { should exist }
   end   
   
