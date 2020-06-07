@@ -129,6 +129,22 @@ control 'create-ssh-host-keys' do
     its('exit_status') { should eq 0 }
     its('stdout') { should match /completed/ }
   end
+  
+  describe file(base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-ssh-rsa-host-key') do
+    it { should exist }
+  end
+  
+  describe file(base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-ssh-rsa-host-key.pub') do
+    it { should exist }
+  end
+  
+  describe file(base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-ssh-rsa-host-key-cert.pub') do
+    it { should exist }
+  end
+  
+  describe command('ssh-keygen -l -f ' + base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-ssh-rsa-host-key-cert.pub') do
+    its('exit_status') { should eq 0 }
+  end
 
 end
 
