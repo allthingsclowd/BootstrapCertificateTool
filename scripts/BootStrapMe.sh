@@ -111,20 +111,12 @@ generate_and_configure_new_host_keys() {
     local tmpDir=${baseDir}/${defaultRoot}/${sshKeys}/${defaultSSH}/${NAME}
     local bootStrapFile=${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
     local keyFile=${tmpDir}/${TARGETNAME}-ssh-rsa-host-key
-
-    # Create new host keys
-    echo -e "Generate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES"
-    [ ! -d ${tmpDir} ] && mkdir -p ${tmpDir}
     
-    [ -f ${keyFile} ] && rm -rf ${keyFile}*
-    
-    # create new host key
-    ssh-keygen -N '' -C ${TARGETNAME}-SSH-HOST-RSA-KEY -t rsa \
-                -b 4096 -h \
-                -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
-                -f ${keyFile} && \
-        echo -e "\nNew SSH keys created - ${keyFile}, ${keyFile}.pub" || \
-        echo -e "\nError creating ssh host key."
+    # load the signing keys into memory
+    [ -f ${bootStrapFile} ] && \
+      echo -e "Sourcing the signing keys" && \
+      source ${bootStrapFile} || \
+      echo -e "No signing keys file found at ${bootStrapFile}"
 
     # Check that CA signing key is available
     ( [ ! -z ${NAME}_ssh_rsa_ca ] && \
@@ -151,6 +143,20 @@ generate_and_configure_new_host_keys() {
         exit 1 )
     
     chmod 644 ${caFile}.pub.tmp
+    
+    # Create new host keys
+    echo -e "Generate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES"
+    [ ! -d ${tmpDir} ] && mkdir -p ${tmpDir}
+    
+    [ -f ${keyFile} ] && rm -rf ${keyFile}*
+
+    # create new host key
+    ssh-keygen -N '' -C ${TARGETNAME}-SSH-HOST-RSA-KEY -t rsa \
+                -b 4096 -h \
+                -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
+                -f ${keyFile} && \
+        echo -e "\nNew SSH keys created - ${keyFile}, ${keyFile}.pub" || \
+        echo -e "\nError creating ssh host key."
 
     echo -e "Sign the new keys for ${TARGETNAME}"
     # Sign the public key
