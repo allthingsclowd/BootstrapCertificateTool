@@ -142,6 +142,7 @@ generate_and_configure_new_host_keys() {
         mkdir -p ${caDir} && \
         eval 'echo "${'"${NAME}_ssh_rsa_ca_pub"'}"' > ${caFile}.pub.tmp && \ 
         echo -e "***********DEBUG************" && \
+        echo ${NAME}_ssh_rsa_ca_pub && \
         cat ${caFile}.pub.tmp ) || \
     ( echo -e "\nSSH CA Public Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && \
         exit 1 )
