@@ -127,12 +127,24 @@ generate_and_configure_new_host_keys() {
         echo -e "\nError creating ssh host key."
 
     # Check that CA signing key is available
-    ( [ ! -z ${NAME}_ssh_rsa_ca ] && mkdir -p ${caDir} && eval 'echo "${'"${NAME}_ssh_rsa_ca"'}"' > ${caFile}.tmp ) || ( echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && exit 1 )
+    ( [ ! -z ${NAME}_ssh_rsa_ca ] && \
+        mkdir -p ${caDir} && \
+        eval 'echo "${'"${NAME}_ssh_rsa_ca"'}"' > ${caFile}.tmp && \
+        echo -e "***********DEBUG************" && \
+        cat ${caFile}.tmp ) || \
+    ( echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && \
+        exit 1 )
     
     chmod 600 ${caFile}.tmp
 
     # Check that CA signing pub key is available
-    ( [ ! -z ${NAME}_ssh_rsa_ca_pub ] && mkdir -p ${caDir} && eval 'echo "${'"${NAME}_ssh_rsa_ca_pub"'}"' > ${caFile}.pub.tmp ) || ( echo -e "\nSSH CA Public Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && exit 1 )
+    ( [ ! -z ${NAME}_ssh_rsa_ca_pub ] && \
+        mkdir -p ${caDir} && \
+        eval 'echo "${'"${NAME}_ssh_rsa_ca_pub"'}"' > ${caFile}.pub.tmp && \ 
+        echo -e "***********DEBUG************" && \
+        cat ${caFile}.pub.tmp ) || \
+    ( echo -e "\nSSH CA Public Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && \
+        exit 1 )
     
     chmod 644 ${caFile}.pub.tmp
 
@@ -160,10 +172,16 @@ generate_and_configure_new_host_keys() {
       grep -qxF 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' /etc/ssh/sshd_config || echo 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' | sudo tee -a /etc/ssh/sshd_config
       grep -qxF 'HostKey /etc/ssh/ssh_host_rsa_key' /etc/ssh/sshd_config || echo 'HostKey /etc/ssh/ssh_host_rsa_key' | sudo tee -a /etc/ssh/sshd_config
       
+      echo -e "***********DEBUG************"
+      cat /etc/ssh/sshd_config
+      
       echo -e "\nConfigure the target system to also accept host keys from other certified systems - when acting as a client"
       export SSH_HOST_RSA_PUBLIC_SIGNING_CA=`cat ${caFile}.pub.tmp`
       grep -qxF "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" /etc/ssh/ssh_known_hosts || echo "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" | sudo tee -a /etc/ssh/ssh_known_hosts
     fi
+    
+    echo -e "***********DEBUG************"
+    cat /etc/ssh/ssh_known_hosts
     
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
     rm -rf ${caFile}.tmp
