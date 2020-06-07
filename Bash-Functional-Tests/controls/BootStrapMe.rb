@@ -93,6 +93,48 @@ control 'verify-ssh-initialise-rerun' do
   end
 
 end
+
+control 'create-ssh-host-keys' do                      
+  impact 1.0                                
+  title 'Create SSH Host Keys for the suplied Hostname'
+  desc 'create new host keys for a server'
+  
+  describe file(base_dir + '/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca.pub') do
+    it { should exist }
+  end
+  
+  describe file(base_dir + '/.bootstrap/CA/SSH/Bananas/Bananas-ssh-rsa-ca') do
+    it { should exist }
+  end   
+  
+  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
+            -H \
+            -n Bananas \
+            -h grazzer \
+            -i 192.168.9.11,192.168.9.4 \
+            -a hashistack.ie,*.hashistack.ie \
+            -p 8.8.8.8') do
+    its('exit_status') { should eq 0 }
+    its('stdout') { should match /found/ }
+  end
+
+  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
+            -H \
+            -n Bananas \
+            -h grazzer \
+            -i 192.168.9.11,192.168.9.4 \
+            -a hashistack.ie,*.hashistack.ie \
+            -p 8.8.8.8 \
+            -s') do
+    its('exit_status') { should eq 0 }
+    its('stdout') { should match /found/ }
+  end
+
+end
+
+
+
+
 #control 'verify-ssl-initialise-option-c' do                      
 #  impact 1.0                                
 #  title 'Option -C -n <ssl root ca name>'
