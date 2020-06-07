@@ -76,8 +76,9 @@ ssh_init() {
       echo -e "CA ${caFile} has been found and will be re-used./n" && \
       return
     
-    echo -e "Create SSH CA KEY for ${tmpDir}"
     # Generate a new OpenSSH CA if one does not already exist
+    echo -e "Create SSH CA KEY for ${tmpDir}"
+    [ ! -d ${tmpDir} ] && mkdir -p ${tmpDir}
     
     [ ! -f ${caFile} ] && \
         echo -e "\nA New SSH HOST CA is being created - ${caFile}" && \
