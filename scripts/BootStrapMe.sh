@@ -189,7 +189,7 @@ generate_and_configure_new_host_keys() {
       echo -e "\nConfigure the target system also accept host keys from other certified systems - when acting as a client"
       export SSH_HOST_RSA_PUBLIC_SIGNING_CA=`cat ${caFile}.pub.tmp`
       # remove previos keys
-      sed 's#@cert-authority \*.*##g' /etc/ssh/ssh_known_hosts
+      sed 's#@cert-authority \*.*# #g' /etc/ssh/ssh_known_hosts
       grep -qxF "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" /etc/ssh/ssh_known_hosts || echo "@cert-authority * ${SSH_HOST_RSA_PUBLIC_SIGNING_CA}" | sudo tee -a /etc/ssh/ssh_known_hosts
 
     fi
