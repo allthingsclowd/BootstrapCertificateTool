@@ -112,37 +112,39 @@ generate_and_configure_new_host_keys() {
     local bootStrapFile=${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
     local keyFile=${tmpDir}/${TARGETNAME}-ssh-rsa-host-key
     
-    # load the signing keys into memory
-    [ -f ${bootStrapFile} ] && \
-      echo -e "Sourcing the signing keys" && \
-      source ${bootStrapFile} || \
-      echo -e "No signing keys file found at ${bootStrapFile}"
+    
 
     # Check that CA signing key is available
-    ( [ ! -z ${NAME}_ssh_rsa_ca ] && \
-        mkdir -p ${caDir} && \
-        eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp && \
-        echo -e "***********DEBUG************" && \
-        echo "$"${NAME}_ssh_rsa_ca  && \
-        echo "$"${NAME}_ssh_rsa_ca && \
-        ls -al ${caFile}.tmp  && \
-        cat ${caFile}.tmp ) || \
-    ( echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && \
-        exit 1 )
-    
-    chmod 600 ${caFile}.tmp
+    if [ ! -z "${NAME}_ssh_rsa_ca+set" ] && [ ! -z "${NAME}_ssh_rsa_ca-unset" ]; then
+        
+        # load the signing keys into memory
+        if [ -f "${bootStrapFile}" ]; then
+          echo -e "Sourcing the signing keys"
+          source ${bootStrapFile}
+        else
+          echo -e "BANG! No signing keys file found at ${bootStrapFile} to commence bootstrap process"
+          exit 1
+        fi
+        
+        [ -d ${caDir} ] || mkdir -p ${caDir}
+        eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp
+        echo -e "***********DEBUG CA************"
+        echo "$"${NAME}_ssh_rsa_ca
+        ls -al ${caFile}.tmp
+        cat ${caFile}.tmp
+        
+        eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp
+        echo -e "***********DEBUG CA PUB************"
+        echo "$"${NAME}_ssh_rsa_ca_pub
+        ls -al ${caFile}.pub.tmp
+        cat ${caFile}.pub.tmp
 
-    # Check that CA signing pub key is available
-    ( [ ! -z ${NAME}_ssh_rsa_ca_pub ] && \
-        mkdir -p ${caDir} && \
-        eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp && \ 
-        echo -e "***********DEBUG************" && \
-        echo "$"${NAME}_ssh_rsa_ca_pub && \
-        cat ${caFile}.pub.tmp ) || \
-    ( echo -e "\nSSH CA Public Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables" && \
-        exit 1 )
-    
-    chmod 644 ${caFile}.pub.tmp
+        chmod 600 ${caFile}.tmp
+        chmod 644 ${caFile}.pub.tmp
+    else
+      echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+      exit 1
+    fi
     
     # Create new host keys
     echo -e "Generate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES"
