@@ -146,6 +146,10 @@ verify_ca_signing_keys() {
     [ -d ${caDir} ] || mkdir -p ${caDir}
     eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp        
     eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp
+    
+    ls -al ${caFile}.tmp ${caFile}.pub.tmp
+    cat ${caFile}.tmp
+    
     chmod 600 ${caFile}.tmp
     chmod 644 ${caFile}.pub.tmp
 
@@ -161,6 +165,9 @@ generate_and_configure_new_user_keys() {
 
     # Check that CA signing key is available
     verify_ca_signing_keys
+    
+    ls -al ${caFile}.tmp ${caFile}.pub.tmp
+    cat ${caFile}.tmp
 
     # Create new host keys if they don't already exist
     echo -e "Generate new ssh keys for user ${USER}"
