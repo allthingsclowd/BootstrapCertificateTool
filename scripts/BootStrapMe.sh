@@ -111,73 +111,60 @@ generate_and_configure_new_host_keys() {
     local tmpDir=${baseDir}/${defaultRoot}/${sshKeys}/${defaultSSH}/${NAME}
     local bootStrapFile=${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
     local keyFile=${tmpDir}/${TARGETNAME}-ssh-rsa-host-key
-    
-    
-    env
+
     # Check that CA signing key is available
-    export caEnv=${NAME}_ssh_rsa_ca
-    export caPubEnv=${NAME}_ssh_rsa_ca_pub
-    env
-    if [[ -z "${!caEnv}" ]] || [[ -z "${!caPubEnv}" ]]; then
-        
+    export caEnv="${NAME}"_ssh_rsa_ca
+    export caPubEnv="${NAME}"_ssh_rsa_ca_pub
+
+    if ( [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] ); then
+        echo -e "\n${!caEnv} or ${!caPubEnv} environment variable need to be set\n"
         # load the signing keys into memory
-        if [[ -f "${bootStrapFile}" ]]; then
-          echo -e "Sourcing the signing keys"
-          env
+        if [ -f "${bootStrapFile}" ]; then
+          echo -e "\nSourcing the signing key environment variables from: ${bootStrapFile}\n"
           source ${bootStrapFile}
-          env
-          echo "${NAME}_ssh_rsa_ca AND ${NAME}_ssh_rsa_ca_pub"
-          
-          if [[ -z "${!caEnv}" ]] || [[ -z "${!caPubEnv}" ]]; then
-            echo -e "BANG! No signing keys found in ${bootStrapFile} to commence bootstrap process"
+          echo -e "\nBoth ${!caEnv:-'Missing'} and ${!caPubEnv:-'Missing'} should now be set\n"
+
+          if ( [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] ); then
+            echo -e "\nBANG! No signing keys found in ${bootStrapFile} to commence bootstrap process\n"
             exit 1
           fi
         else
-          echo -e "BANG! No signing keys file found at ${bootStrapFile} to commence bootstrap process"
+          echo -e "\nBANG! No signing keys file found at ${bootStrapFile} to commence bootstrap process\n"
           exit 1
         fi
         
+        echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
         [ -d ${caDir} ] || mkdir -p ${caDir}
-        eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp
-        echo -e "***********DEBUG CA************"
-        echo "$"${NAME}_ssh_rsa_ca
-        ls -al ${caFile}.tmp
-        cat ${caFile}.tmp
-        
+        eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp        
         eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp
-        echo -e "***********DEBUG CA PUB************"
-        echo "$"${NAME}_ssh_rsa_ca_pub
-        ls -al ${caFile}.pub.tmp
-        cat ${caFile}.pub.tmp
-
         chmod 600 ${caFile}.tmp
         chmod 644 ${caFile}.pub.tmp
     else
-      echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables"
+      echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables\n"
       exit 1
     fi
     
     # Create new host keys
-    echo -e "Generate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES"
-    [ ! -d ${tmpDir} ] && mkdir -p ${tmpDir}
-    
-    [ -f ${keyFile} ] && rm -rf ${keyFile}*
+    echo -e "\nGenerate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES\n"
+    [ ! -d "${tmpDir}" ] && mkdir -p "${tmpDir}"
+    # remove previous files
+    [ -f "${keyFile}" ] && rm -rf ${keyFile}* 
 
     # create new host key
     ssh-keygen -N '' -C ${TARGETNAME}-SSH-HOST-RSA-KEY -t rsa \
                 -b 4096 -h \
                 -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
                 -f ${keyFile} && \
-        echo -e "\nNew SSH keys created - ${keyFile}, ${keyFile}.pub" || \
-        echo -e "\nError creating ssh host key."
+        echo -e "\nNew SSH keys created - ${keyFile}, ${keyFile}.pub\n" || \
+        echo -e "\nError creating ssh host key.\n"
 
-    echo -e "Sign the new keys for ${TARGETNAME}"
+    echo -e "\nSign the new keys for ${TARGETNAME} \n"
     # Sign the public key
     ssh-keygen -s ${caFile} -I ${TARGETNAME}_hashistack_server \
                -h -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
                -V -5m:+52w ${keyFile}.pub && \
-        echo -e "\nNew SIGNED SSH CERTIFICATE created - ${keyFile}-cert.pub" || \
-        echo -e "\nError signing ssh host key."        
+        echo -e "\nNew SIGNED SSH CERTIFICATE created - ${keyFile}-cert.pub\n" || \
+        echo -e "\nError signing ssh host key.\n"        
 
     if [ ! "${SETKEY}" == "FALSE" ]; then
       
@@ -191,13 +178,13 @@ generate_and_configure_new_host_keys() {
       chmod 644 /etc/ssh/ssh_host_rsa_key.pub
       chmod 644 /etc/ssh/ssh_host_rsa_key-cert.pub
 
-      echo -e "\nConfigure the target system to present the host key when ssh is used"      
+      echo -e "\nConfigure the target system to present the host key when ssh is used\n"      
       
       grep -qxF 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' /etc/ssh/sshd_config || echo 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' | sudo tee -a /etc/ssh/sshd_config
       grep -qxF 'HostKey /etc/ssh/ssh_host_rsa_key' /etc/ssh/sshd_config || echo 'HostKey /etc/ssh/ssh_host_rsa_key' | sudo tee -a /etc/ssh/sshd_config
       
       
-      echo -e "\nConfigure the target system also accept host keys from other certified systems - when acting as a client"
+      echo -e "\nConfigure the target system also accept host keys from other certified systems - when acting as a client\n"
       export SSH_HOST_RSA_PUBLIC_SIGNING_CA=`cat ${caFile}.pub.tmp`
       # remove previos keys
       sed -i '/@cert-authority \*.*/d' /etc/ssh/ssh_known_hosts
@@ -209,7 +196,7 @@ generate_and_configure_new_host_keys() {
     rm -rf ${caFile}.tmp
     rm -rf ${caFile}.pub.tmp
 
-    echo -e "SSH Host Key creation process for ${TARGETNAME} is has completed."
+    echo -e "\n\nSSH Host Key creation process for ${TARGETNAME} is has completed.\n\n"
     
 }
 
