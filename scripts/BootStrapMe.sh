@@ -387,6 +387,6 @@ done
   [ ! "${TARGETDNS}" == "" ] && [ ! "${TARGETIPS}" == "" ] && \
   [ ! "${TARGETNAME}" == "" ]) && generate_and_configure_new_host_keys
 ([ "${USERKEY}" == "TRUE" ] && [ ! "${NAME}" == "" ] && \
-  [ ! "${USER}" == "" ] && [ ! "${TARGETIPS}" == "" ] && generate_and_configure_new_user_keys  
+  [ ! "${USER}" == "" ] && [ ! "${PRINCIPALS}" == "" ]) && generate_and_configure_new_user_keys  
 
 exit 0                                        
