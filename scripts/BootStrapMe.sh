@@ -144,8 +144,8 @@ verify_ca_signing_keys() {
         
     echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
     [ -d ${caDir} ] || mkdir -p ${caDir}
-    eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp        
-    eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp
+    eval echo "$"${NAME}_ssh_rsa_ca | sed -e 's/\r//g' > ${caFile}.tmp        
+    eval echo "$"${NAME}_ssh_rsa_ca_pub | sed -e 's/\r//g' > ${caFile}.pub.tmp
     
     ls -al ${caFile}.tmp ${caFile}.pub.tmp
     cat ${caFile}.tmp
@@ -266,7 +266,7 @@ generate_and_configure_new_host_keys() {
 
     echo -e "\nSign the new keys for ${TARGETNAME} \n"
     # Sign the public key
-    ssh-keygen -s ${caFile} -I ${TARGETNAME}_hashistack_server \
+    ssh-keygen -s ${caFile}.tmp -I ${TARGETNAME}_hashistack_server \
                -h -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
                -V -5m:+52w ${keyFile}.pub && \
         echo -e "\nNew SIGNED SSH CERTIFICATE created - ${keyFile}-cert.pub\n" || \
