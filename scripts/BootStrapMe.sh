@@ -166,7 +166,7 @@ generate_and_configure_new_user_keys() {
     echo -e "Generate new ssh keys for user ${USER}"
     
     # Remove obsolete keys
-    [ -f "${keyFile}" ] && rm -rf ${keyFile}*
+    [ -f "${keyFile}" ] && rm -rf ${keyFile} ${keyFile}.pub ${keyFile}-cert.pub
 
 
     # ${1} - Environment that host ca signing key is gemerated for
@@ -247,7 +247,7 @@ generate_and_configure_new_host_keys() {
     echo -e "\nGenerate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES\n"
     [ ! -d "${tmpDir}" ] && mkdir -p "${tmpDir}"
     # remove previous files
-    [ -f "${keyFile}" ] && rm -rf ${keyFile}* 
+    [ -f "${keyFile}" ] && rm -rf ${keyFile} ${keyFile}.pub ${keyFile}-cert.pub
 
     # create new host key
     ssh-keygen -N '' -C ${TARGETNAME}-SSH-HOST-RSA-KEY -t rsa \
