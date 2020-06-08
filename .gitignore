@@ -3,3 +3,4 @@ Outputs/IntermediateCAs/*
 .vagrant
 PublicCerts_Protect/
 .bootstrap/*
+.DS_Store
