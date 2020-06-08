@@ -140,17 +140,14 @@ verify_ca_signing_keys() {
           echo -e "\nBANG! No signing keys file found at ${bootStrapFile} to commence bootstrap process\n"
           exit 1
         fi
-        
-        echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
-        [ -d ${caDir} ] || mkdir -p ${caDir}
-        eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp        
-        eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp
-        chmod 600 ${caFile}.tmp
-        chmod 644 ${caFile}.pub.tmp
-    else
-      echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables\n"
-      exit 1
     fi
+        
+    echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
+    [ -d ${caDir} ] || mkdir -p ${caDir}
+    eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp        
+    eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp
+    chmod 600 ${caFile}.tmp
+    chmod 644 ${caFile}.pub.tmp
 
 }
 
