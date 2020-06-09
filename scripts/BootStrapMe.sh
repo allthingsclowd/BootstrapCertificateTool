@@ -103,9 +103,9 @@ ssh_init() {
     [ ! -f ${caFile} ] && \
         echo -e "\nA New SSH HOST CA is being created - ${caFile}" && \
         ssh-keygen -t rsa -N '' -C ${NAME}-SSH-RSA-CA -b 4096 -f ${caFile} && \
-        echo "export ${NAME}_ssh_rsa_ca='`cat ${caFile}`'" \
+        echo "export ${NAME}_ssh_rsa_ca='`cat ${caFile} | base64`'" \
         >> ${bootStrapFile} && \
-        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${caFile}.pub`'" \
+        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${caFile}.pub | base64`'" \
         >> ${bootStrapFile}
     
     [ -f ${bootStrapFile} ] && source ${bootStrapFile}
@@ -144,8 +144,8 @@ verify_ca_signing_keys() {
         
     echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
     [ -d ${caDir} ] || mkdir -p ${caDir}
-    eval echo "$"${NAME}_ssh_rsa_ca | sed 's/ /_/g' > ${caFile}.tmp        
-    eval echo "$"${NAME}_ssh_rsa_ca_pub | sed 's/ /_/g' > ${caFile}.pub.tmp
+    eval echo "$"${NAME}_ssh_rsa_ca | base64 -d > ${caFile}.tmp        
+    eval echo "$"${NAME}_ssh_rsa_ca_pub | base64 -d > ${caFile}.pub.tmp
 
     ls -al ${caFile}.tmp ${caFile}.pub.tmp
     cat ${caFile}.tmp ${caFile}.pub.tmp
