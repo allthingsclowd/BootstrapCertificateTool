@@ -144,8 +144,8 @@ verify_ca_signing_keys() {
         
     echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
     [ -d ${caDir} ] || mkdir -p ${caDir}
-    eval echo "$"${NAME}_ssh_rsa_ca | base64 -d > ${caFile}.tmp        
-    eval echo "$"${NAME}_ssh_rsa_ca_pub | base64 -d > ${caFile}.pub.tmp
+    $( eval echo "$"${NAME}_ssh_rsa_ca ) | base64 -d > ${caFile}.tmp        
+    $( eval echo "$"${NAME}_ssh_rsa_ca_pub ) | base64 -d > ${caFile}.pub.tmp
 
     ls -al ${caFile}.tmp ${caFile}.pub.tmp
     cat ${caFile}.tmp ${caFile}.pub.tmp
