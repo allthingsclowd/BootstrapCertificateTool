@@ -212,10 +212,10 @@ generate_and_configure_new_user_keys() {
 
         echo -e "\nMove the TrustedUserCAKeys into Place\n"
 
-        [ -f "${caFile}.pub" ] && rm -f ${caFile}
+        [ -f "${caFile}".pub ] && rm -f ${caFile}*
 
         # Move the USER CA Public signing key into the sshd_config file
-        cp caFile.pub /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
+        cp ${caFile}.pub /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
         echo -e "\nConfigure the target system to Trust user certificates signed by the ${NAME}-SSH-USER-RSA-CA key when ssh certificates are used"
         grep -qxF "TrustedUserCAKeys /etc/ssh/${NAME}-ssh-user-rsa-ca.pub" /etc/ssh/sshd_config || echo "TrustedUserCAKeys /etc/ssh/${NAME}-ssh-user-rsa-ca.pub" | sudo tee -a /etc/ssh/sshd_config
 
