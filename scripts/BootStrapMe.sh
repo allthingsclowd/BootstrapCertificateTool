@@ -16,6 +16,8 @@
 
 # Initialise some variables that capture the command line inputs
 NAME=""
+USER=""
+PRINCIPALS=""
 SSHINIT="FALSE"
 SSLINIT="FALSE"
 SSHRESET="FALSE"
@@ -29,6 +31,7 @@ TARGETDNS=""
 PUBLICIP=""
 HOSTKEY="FALSE"
 SETKEY="FALSE"
+USERCERT="FALSE"
 
 # Constants - FILE PATHS
 readonly baseDir="/usr/local/bootstrap"
@@ -50,7 +53,8 @@ usage() {
   echo "Usage: ${0} -R -n NAME to reinitialise an OpenSSL Certificate Authority" 1>&2
   echo "Usage: ${0} -C -n NAME to create an OpenSSL Certificate Authority" 1>&2
   echo "Usage: ${0} -D -n NAME to delete an OpenSSL Certificate Authority" 1>&2
-  echo "Usage: ${0} -H -n NAME -h HOSTNAME -i IPADDRESSES (hostname -I string) -a DOMAINS -p PUBLICIP -s SET THE KEYS to create an OpenSSH HostKey" 1>&2
+  echo "Usage: ${0} -H -n NAME -h HOSTNAME -i IPADDRESSES -a DOMAINS -p PUBLICIP [-s SET THE KEYS] to create an OpenSSH HostKey" 1>&2
+  echo "Usage: ${0} -U -n NAME -u USERNAME -b {string of comma separated principals e.g. 'graham,fred,brian'} [-s create user account and copy keys to target] to create an OpenSSH HostKey" 1>&2
   echo "Usage: ${0} -Z Nuke All Certificates!!!" 1>&2
 
 }
@@ -59,6 +63,12 @@ usage() {
 exit_abnormal() {                              
   usage
   exit 1
+}
+
+tweet() {
+
+  echo "put a cleaner messaging routine here"
+
 }
 
 # Delete EVERYTHING!!!!!
@@ -93,9 +103,9 @@ ssh_init() {
     [ ! -f ${caFile} ] && \
         echo -e "\nA New SSH HOST CA is being created - ${caFile}" && \
         ssh-keygen -t rsa -N '' -C ${NAME}-SSH-RSA-CA -b 4096 -f ${caFile} && \
-        echo "export ${NAME}_ssh_rsa_ca='`cat ${caFile}`'" \
+        echo "export ${NAME}_ssh_rsa_ca='`cat ${caFile} | openssl base64 -A`'" \
         >> ${bootStrapFile} && \
-        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${caFile}.pub`'" \
+        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${caFile}.pub | openssl base64 -A`'" \
         >> ${bootStrapFile}
     
     [ -f ${bootStrapFile} ] && source ${bootStrapFile}
@@ -104,13 +114,11 @@ ssh_init() {
 
 }
 
-generate_and_configure_new_host_keys() {
+verify_ca_signing_keys() {
 
     local caDir=${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}
     local caFile=${caDir}/${NAME}-ssh-rsa-ca
-    local tmpDir=${baseDir}/${defaultRoot}/${sshKeys}/${defaultSSH}/${NAME}
     local bootStrapFile=${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
-    local keyFile=${tmpDir}/${TARGETNAME}-ssh-rsa-host-key
 
     # Check that CA signing key is available
     export caEnv="${NAME}"_ssh_rsa_ca
@@ -132,23 +140,115 @@ generate_and_configure_new_host_keys() {
           echo -e "\nBANG! No signing keys file found at ${bootStrapFile} to commence bootstrap process\n"
           exit 1
         fi
-        
-        echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
-        [ -d ${caDir} ] || mkdir -p ${caDir}
-        eval echo "$"${NAME}_ssh_rsa_ca > ${caFile}.tmp        
-        eval echo "$"${NAME}_ssh_rsa_ca_pub > ${caFile}.pub.tmp
-        chmod 600 ${caFile}.tmp
-        chmod 644 ${caFile}.pub.tmp
-    else
-      echo -e "\nSSH CA Keys NOT FOUND THIS IS AN ERROR!!!. Check environment variables\n"
-      exit 1
     fi
+        
+    echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
+    [ -d ${caDir} ] || mkdir -p ${caDir}
+    eval echo "$"${NAME}_ssh_rsa_ca | openssl base64 -d -A > ${caFile}.tmp        
+    eval echo "$"${NAME}_ssh_rsa_ca_pub | openssl base64 -d -A > ${caFile}.pub.tmp
+
+    ls -al ${caFile}.tmp ${caFile}.pub.tmp
+    cat ${caFile}.tmp ${caFile}.pub.tmp
+    
+    chmod 600 ${caFile}.tmp
+    chmod 644 ${caFile}.pub.tmp
+
+}
+
+generate_and_configure_new_user_keys() {
+
+    local caDir=${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}
+    local caFile=${caDir}/${NAME}-ssh-rsa-ca
+    local tmpDir=${baseDir}/${defaultRoot}/${sshKeys}/${defaultSSH}/${NAME}
+    local bootStrapFile=${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
+    local keyFile=${tmpDir}/${USER}-id_rsa
+
+    # Check that CA signing key is available
+    verify_ca_signing_keys
+    
+    # Create directories
+    [ -d ${tmpDir} ] || mkdir -p ${tmpDir}
+
+    # Create new host keys if they don't already exist
+    echo -e "Generate new ssh keys for user ${USER}"
+    
+    # Remove obsolete keys
+    [ -f "${keyFile}" ] && rm -rf ${keyFile} ${keyFile}.pub ${keyFile}-cert.pub
+   
+    # Generate new keys
+    ssh-keygen -N '' -C ${USER}-${NAME}-USER-KEY -t rsa -b 4096 -h -f ${keyFile} && \
+        echo -e "\nNew SSH keys created - ${keyFile}, ${keyFile}.pub"
+    
+    echo -e "Sign the new keys for user ${USER}"
+    # Sign the user key with the public key
+    ssh-keygen -s ${caFile}.tmp -I ${USER}-${NAME}-user-key -n ${USER},${PRINCIPALS} -V -5:+52w -z 1 ${keyFile}.pub && \
+        echo -e "\nNew SSH CERTIFICATE created - ${keyFile}-cert.pub"      
+    chmod 600 ${keyFile}
+    chmod 644 ${keyFile}.pub
+    chmod 644 ${keyFile}-cert.pub
+
+    echo -e "\n${NAME} SSH USER CA and Key creation process for ${USER} is has completed."
+
+    # If set option, -s, is selected create user on host and move keys into place 
+    if [ ! "${SETKEY}" == "FALSE" ]; then
+
+        if ! grep "\<"${USER}"\>" /etc/passwd >/dev/null 2>&1; then
+          
+          echo "Creating ${USER} user with ssh access"
+          useradd --create-home --home-dir /home/${USER} --shell /bin/bash ${USER}
+          usermod -aG sudo ${USER}
+          
+        fi
+
+        mkdir -p /home/${USER}/.ssh
+        cp ${keyFile} /home/${USER}/.ssh/id_rsa
+        cp ${keyFile}.pub /home/${USER}/.ssh/id_rsa.pub
+        cp ${keyFile}-cert.pub /home/${USER}/.ssh/id_rsa-cert.pub
+        chmod 700 /home/${USER}/.ssh
+        chmod 600 /home/${USER}/.ssh/id_rsa
+        chmod 644 /home/${USER}/.ssh/id_rsa.pub
+        chmod 644 /home/${USER}/.ssh/id_rsa-cert.pub
+        chown -R ${USER}:${USER} /home/${USER}/
+
+        echo -e "\nMove the TrustedUserCAKeys into Place\n"
+
+        [ -f "${caFile}".pub ] && rm -f ${caFile} ${caFile}.pub
+
+        # Move the USER CA Public signing key into the sshd_config file
+        cp ${caFile}.pub.tmp /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
+        echo -e "\nConfigure the target system to Trust user certificates signed by the ${NAME}-SSH-USER-RSA-CA key when ssh certificates are used"
+        grep -qxF "TrustedUserCAKeys /etc/ssh/${NAME}-ssh-user-rsa-ca.pub" /etc/ssh/sshd_config || echo "TrustedUserCAKeys /etc/ssh/${NAME}-ssh-user-rsa-ca.pub" | sudo tee -a /etc/ssh/sshd_config
+
+        chmod 644 /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
+        echo -e "\nTrustedUserCAKeys configured."
+        
+    fi
+    
+    # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
+#    rm -rf ${caFile}.tmp
+#    rm -rf ${caFile}.pub.tmp
+    
+    echo -e "\n==========USER Keys Creation Completed Successfully================"
+}
+
+
+
+generate_and_configure_new_host_keys() {
+
+    local caDir=${baseDir}/${defaultRoot}/${rootCA}/${defaultSSH}/${NAME}
+    local caFile=${caDir}/${NAME}-ssh-rsa-ca
+    local tmpDir=${baseDir}/${defaultRoot}/${sshKeys}/${defaultSSH}/${NAME}
+    local bootStrapFile=${baseDir}/${defaultRoot}/${rootCA}/BootstrapCAs.sh
+    local keyFile=${tmpDir}/${TARGETNAME}-ssh-rsa-host-key
+
+    # Check that CA signing key is available
+    verify_ca_signing_keys  
     
     # Create new host keys
     echo -e "\nGenerate new ssh keys for ${TARGETNAME} HOST Key CERTIFICATES\n"
     [ ! -d "${tmpDir}" ] && mkdir -p "${tmpDir}"
     # remove previous files
-    [ -f "${keyFile}" ] && rm -rf ${keyFile}* 
+    [ -f "${keyFile}" ] && rm -rf ${keyFile} ${keyFile}.pub ${keyFile}-cert.pub
 
     # create new host key
     ssh-keygen -N '' -C ${TARGETNAME}-SSH-HOST-RSA-KEY -t rsa \
@@ -160,7 +260,7 @@ generate_and_configure_new_host_keys() {
 
     echo -e "\nSign the new keys for ${TARGETNAME} \n"
     # Sign the public key
-    ssh-keygen -s ${caFile} -I ${TARGETNAME}_hashistack_server \
+    ssh-keygen -s ${caFile}.tmp -I ${TARGETNAME}_hashistack_server \
                -h -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
                -V -5m:+52w ${keyFile}.pub && \
         echo -e "\nNew SIGNED SSH CERTIFICATE created - ${keyFile}-cert.pub\n" || \
@@ -211,9 +311,12 @@ ssl_init() {
 }
 
 # Process all the commandline inputs using BASH getopts - not to be confused with OS getopt
-while getopts "rcdRCDZn:Hh:i:a:p:s" options; do              
+while getopts "rcdRCDZn:Hh:i:a:p:sUu:b:" options; do              
                                               
   case "${options}" in   
+    b)
+      PRINCIPALS=${OPTARG}
+      ;;
     s)
       SETKEY="TRUE"
       ;;                      
@@ -263,6 +366,12 @@ while getopts "rcdRCDZn:Hh:i:a:p:s" options; do
     n)                                         
       NAME=${OPTARG}                          
       ;;
+    U)
+      USERKEY="TRUE"                                                                   
+      ;;
+    u)                                         
+      USER=${OPTARG}                           
+      ;;      
     :)                                         
       echo "Error: -${OPTARG} requires an argument."
       exit_abnormal                            
@@ -277,6 +386,8 @@ done
 ([ "${SSLINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ]) && ssl_init
 ([ "${TARGETHOST}" == "TRUE" ] && [ ! "${NAME}" == "" ] && \
   [ ! "${TARGETDNS}" == "" ] && [ ! "${TARGETIPS}" == "" ] && \
-  [ ! "${TARGETNAME}" == "" ]) && generate_and_configure_new_host_keys  
+  [ ! "${TARGETNAME}" == "" ]) && generate_and_configure_new_host_keys
+([ "${USERKEY}" == "TRUE" ] && [ ! "${NAME}" == "" ] && \
+  [ ! "${USER}" == "" ] && [ ! "${PRINCIPALS}" == "" ]) && generate_and_configure_new_user_keys  
 
 exit 0                                        
