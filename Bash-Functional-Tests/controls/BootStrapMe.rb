@@ -181,16 +181,6 @@ control 'create-ssh-user-keys' do
     its('exit_status') { should eq 0 }
     its('stdout') { should match /completed/ }
   end
-
-  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
-            -U \
-            -n Bananas \
-            -u grazzer \
-            -b graz,pi,graham
-            -s') do
-    its('exit_status') { should eq 0 }
-    its('stdout') { should match /completed/ }
-  end
   
   describe file(base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-ssh-rsa-user-key') do
     it { should exist }
@@ -206,6 +196,16 @@ control 'create-ssh-user-keys' do
   
   describe command('ssh-keygen -l -f ' + base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-ssh-rsa-user-key-cert.pub') do
     its('exit_status') { should eq 0 }
+  end
+
+  describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
+            -U \
+            -n Bananas \
+            -u grazzer \
+            -b graz,pi,graham
+            -s') do
+    its('exit_status') { should eq 1 }
+    its('stdout') { should match /completed/ }
   end
 
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
