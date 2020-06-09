@@ -187,12 +187,12 @@ generate_and_configure_new_user_keys() {
     chmod 644 ${keyFile}.pub
     chmod 644 ${keyFile}-cert.pub
 
-    echo -e "\n${1} SSH USER CA and Key creation process for ${2} is has completed."
+    echo -e "\n${NAME} SSH USER CA and Key creation process for ${USER} is has completed."
 
     # If set option, -s, is selected create user on host and move keys into place 
     if [ ! "${SETKEY}" == "FALSE" ]; then
 
-        if ! grep ${USER} /etc/passwd >/dev/null 2>&1; then
+        if ! grep "\<"${USER}"\>" /etc/passwd >/dev/null 2>&1; then
           
           echo "Creating ${USER} user with ssh access"
           useradd --create-home --home-dir /home/${USER} --shell /bin/bash ${USER}
