@@ -144,27 +144,11 @@ verify_ca_signing_keys() {
         
     echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
     [ -d ${caDir} ] || mkdir -p ${caDir}
-    eval echo "$"${NAME}_ssh_rsa_ca | sed -e 's/\\r\\n/_/g' > ${caFile}.tmp        
-    eval echo "$"${NAME}_ssh_rsa_ca_pub | sed -e 's/\\r\\n/_/g' > ${caFile}.pub.tmp
-    eval echo "$"${NAME}_ssh_rsa_ca | sed -e 's/\\r/_/g' > ${caFile}.tmp1                                                                     
-    eval echo "$"${NAME}_ssh_rsa_ca_pub | sed -e 's/\\r/_/g' > ${caFile}.pub.tmp1
-    eval echo "$"${NAME}_ssh_rsa_ca | sed -e 's/\r/_/g' > ${caFile}.tmp2                                                                     
-    eval echo "$"${NAME}_ssh_rsa_ca_pub | sed -e 's/\r/_/g' > ${caFile}.pub.tmp2
-    eval echo "$"${NAME}_ssh_rsa_ca | sed -e 's/\n/_/g' > ${caFile}.tmp3                                                                     
-    eval echo "$"${NAME}_ssh_rsa_ca_pub | sed -e 's/\n/_/g' > ${caFile}.pub.tmp3
-    eval echo "$"${NAME}_ssh_rsa_ca | tr -d '/r' > ${caFile}.tmp4                                                                     
-    eval echo "$"${NAME}_ssh_rsa_ca_pub | tr -d '/r' > ${caFile}.pub.tmp4
+    eval echo "$"${NAME}_ssh_rsa_ca | sed 's/ /_/g' > ${caFile}.tmp        
+    eval echo "$"${NAME}_ssh_rsa_ca_pub | sed 's/ /_/g' > ${caFile}.pub.tmp
 
-
-    
     ls -al ${caFile}.tmp ${caFile}.pub.tmp
     cat ${caFile}.tmp ${caFile}.pub.tmp
-    ls -al ${caFile}.tmp1 ${caFile}.pub.tmp1
-    cat ${caFile}.tmp1 ${caFile}.pub.tmp1
-    ls -al ${caFile}.tmp2 ${caFile}.pub.tmp2
-    cat ${caFile}.tmp2 ${caFile}.pub.tmp2
-    ls -al ${caFile}.tmp3 ${caFile}.pub.tmp3
-    cat ${caFile}.tmp4 ${caFile}.pub.tmp4
     
     chmod 600 ${caFile}.tmp
     chmod 644 ${caFile}.pub.tmp
@@ -247,8 +231,8 @@ generate_and_configure_new_user_keys() {
     fi
     
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
-    rm -rf ${caFile}.tmp
-    rm -rf ${caFile}.pub.tmp
+#    rm -rf ${caFile}.tmp
+#    rm -rf ${caFile}.pub.tmp
     
     echo -e "\n==========USER Keys Creation Completed Successfully================"
 }
