@@ -103,9 +103,9 @@ ssh_init() {
     [ ! -f ${caFile} ] && \
         echo -e "\nA New SSH HOST CA is being created - ${caFile}" && \
         ssh-keygen -t rsa -N '' -C ${NAME}-SSH-RSA-CA -b 4096 -f ${caFile} && \
-        echo "export ${NAME}_ssh_rsa_ca='`cat ${caFile} | base64`'" \
+        echo "export ${NAME}_ssh_rsa_ca='`cat ${caFile} | openssl base64 -A`'" \
         >> ${bootStrapFile} && \
-        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${caFile}.pub | base64`'" \
+        echo "export ${NAME}_ssh_rsa_ca_pub='`cat ${caFile}.pub | openssl base64 -A`'" \
         >> ${bootStrapFile}
     
     [ -f ${bootStrapFile} ] && source ${bootStrapFile}
@@ -144,8 +144,8 @@ verify_ca_signing_keys() {
         
     echo -e "\nCA signing keys found ${!caEnv} and ${!caPubEnv} - starting to build new files\n"
     [ -d ${caDir} ] || mkdir -p ${caDir}
-    $( eval echo "$"${NAME}_ssh_rsa_ca ) | base64 -d > ${caFile}.tmp        
-    $( eval echo "$"${NAME}_ssh_rsa_ca_pub ) | base64 -d > ${caFile}.pub.tmp
+    eval echo "$"${NAME}_ssh_rsa_ca | openssl base64 -d -A > ${caFile}.tmp        
+    eval echo "$"${NAME}_ssh_rsa_ca_pub | openssl base64 -d -A > ${caFile}.pub.tmp
 
     ls -al ${caFile}.tmp ${caFile}.pub.tmp
     cat ${caFile}.tmp ${caFile}.pub.tmp
@@ -166,18 +166,14 @@ generate_and_configure_new_user_keys() {
     # Check that CA signing key is available
     verify_ca_signing_keys
     
-    ls -al ${caFile}.tmp ${caFile}.pub.tmp
-    cat ${caFile}.tmp
+    # Create directories
+    [ -d ${tmpDir} ] || mkdir -p ${tmpDir}
 
     # Create new host keys if they don't already exist
     echo -e "Generate new ssh keys for user ${USER}"
     
     # Remove obsolete keys
     [ -f "${keyFile}" ] && rm -rf ${keyFile} ${keyFile}.pub ${keyFile}-cert.pub
-
-
-    # ${1} - Environment that host ca signing key is gemerated for
-    # ${2} - user {string of comma separated usernames "graham,fred,brian"}
    
     # Generate new keys
     ssh-keygen -N '' -C ${USER}-${NAME}-USER-KEY -t rsa -b 4096 -h -f ${keyFile} && \
@@ -185,9 +181,7 @@ generate_and_configure_new_user_keys() {
     
     echo -e "Sign the new keys for user ${USER}"
     # Sign the user key with the public key
-    ssh-keygen -s ${caFile}.tmp -I ${USER}-${NAME}-user-key \ 
-        -n ${USER},${PRINCIPALS} \
-        -V -5:+52w -z 1 ${keyFile}.pub && \
+    ssh-keygen -s ${caFile}.tmp -I ${USER}-${NAME}-user-key -n ${USER},${PRINCIPALS} -V -5:+52w -z 1 ${keyFile}.pub && \
         echo -e "\nNew SSH CERTIFICATE created - ${keyFile}-cert.pub"      
     chmod 600 ${keyFile}
     chmod 644 ${keyFile}.pub
