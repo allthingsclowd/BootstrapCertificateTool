@@ -194,7 +194,7 @@ control 'create-ssh-user-keys' do
     it { should exist }
   end
   
-  describe command('ssh-keygen -l -f ' + base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-ssh-rsa-user-key-cert.pub') do
+  describe command('ssh-keygen -l -f ' + base_dir + '/.bootstrap/Key/SSH/Bananas/grazzer-id_rsa-cert.pub') do
     its('exit_status') { should eq 0 }
   end
 
@@ -213,7 +213,7 @@ control 'create-ssh-user-keys' do
             -u grazzer \
             -b graz,pi,graham
             -s') do
-    its('exit_status') { should eq 1 }
+    its('exit_status') { should eq 127 }
     its('stdout') { should match /BANG/ }
   end
 
