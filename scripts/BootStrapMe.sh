@@ -277,8 +277,8 @@ generate_and_configure_new_host_keys() {
       
       # delete existing keys if present
       [ -f "/etc/ssh/${TARGETNAME}-ssh-rsa-host-key" ] && mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.old.$(timestamp) && \
-                                                      && mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.pub.old.$(timestamp) && \
-                                                      && mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub.old.$(timestamp)
+                                                      mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.pub.old.$(timestamp) && \
+                                                      mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub.old.$(timestamp)
       cp ${keyFile} /etc/ssh/${TARGETNAME}-ssh-rsa-host-key
       cp ${keyFile}.pub /etc/${TARGETNAME}-ssh-rsa-host-key.pub
       cp ${keyFile}-cert.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub
