@@ -59,6 +59,13 @@ usage() {
 
 }
 
+# set a timestamp on old keys
+timestamp() {
+  date +"%T"
+}
+
+
+
 # What to do on failure routine
 exit_abnormal() {                              
   usage
@@ -77,8 +84,8 @@ nuke_everything() {
   # if the defaultRoot directory exists (-d) then delete it forcefully
   [ -d "${baseDir}/${defaultRoot}" ] && \
     rm -rf ${baseDir}/${defaultRoot} && \
-    echo -e "Successfully removed ALL certificates by deleting ${baseDir}/${defaultRoot}/n" || \
-    echo -e "Failed to delete ${baseDir}/${defaultRoot}/n"
+    echo -e "Successfully removed ALL certificates by deleting ${baseDir}/${defaultRoot}\n" || \
+    echo -e "Failed to delete ${baseDir}/${defaultRoot}\n"
 
 }
 
@@ -201,13 +208,13 @@ generate_and_configure_new_user_keys() {
         fi
 
         mkdir -p /home/${USER}/.ssh
-        cp ${keyFile} /home/${USER}/.ssh/id_rsa
-        cp ${keyFile}.pub /home/${USER}/.ssh/id_rsa.pub
-        cp ${keyFile}-cert.pub /home/${USER}/.ssh/id_rsa-cert.pub
+        cp ${keyFile} /home/${USER}/.ssh/.
+        cp ${keyFile}.pub /home/${USER}/.ssh/.
+        cp ${keyFile}-cert.pub /home/${USER}/.ssh/.
         chmod 700 /home/${USER}/.ssh
-        chmod 600 /home/${USER}/.ssh/id_rsa
-        chmod 644 /home/${USER}/.ssh/id_rsa.pub
-        chmod 644 /home/${USER}/.ssh/id_rsa-cert.pub
+        chmod 600 /home/${USER}/.ssh/${USER}-id_rsa
+        chmod 644 /home/${USER}/.ssh/${USER}-id_rsa.pub
+        chmod 644 /home/${USER}/.ssh/${USER}-id_rsa-cert.pub
         chown -R ${USER}:${USER} /home/${USER}/
 
         echo -e "\nMove the TrustedUserCAKeys into Place\n"
@@ -225,8 +232,8 @@ generate_and_configure_new_user_keys() {
     fi
     
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
-#    rm -rf ${caFile}.tmp
-#    rm -rf ${caFile}.pub.tmp
+   rm -rf ${caFile}.tmp
+   rm -rf ${caFile}.pub.tmp
     
     echo -e "\n==========USER Keys Creation Completed Successfully================"
 }
@@ -269,19 +276,26 @@ generate_and_configure_new_host_keys() {
     if [ ! "${SETKEY}" == "FALSE" ]; then
       
       # delete existing keys if present
-      [ -f /etc/ssh/ssh_host_rsa_key ] && rm -f /etc/ssh/ssh_host_rsa_key /etc/ssh/ssh_host_rsa_key.pub /etc/ssh/ssh_host_rsa_key-cert.pub
-      cp ${keyFile} /etc/ssh/ssh_host_rsa_key
-      cp ${keyFile}.pub /etc/ssh/ssh_host_rsa_key.pub
-      cp ${keyFile}-cert.pub /etc/ssh/ssh_host_rsa_key-cert.pub
+      [ -f "/etc/ssh/${TARGETNAME}-ssh-rsa-host-key" ] && mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.old.$(timestamp) && \
+                                                      && mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.pub.old.$(timestamp) && \
+                                                      && mv /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub.old.$(timestamp)
+      cp ${keyFile} /etc/ssh/${TARGETNAME}-ssh-rsa-host-key
+      cp ${keyFile}.pub /etc/${TARGETNAME}-ssh-rsa-host-key.pub
+      cp ${keyFile}-cert.pub /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub
       
-      chmod 700 /etc/ssh/ssh_host_rsa_key
-      chmod 644 /etc/ssh/ssh_host_rsa_key.pub
-      chmod 644 /etc/ssh/ssh_host_rsa_key-cert.pub
+      chmod 700 /etc/ssh/${TARGETNAME}-ssh-rsa-host-key
+      chmod 644 /etc/ssh/${TARGETNAME}-ssh-rsa-host-key.pub
+      chmod 644 /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub
 
       echo -e "\nConfigure the target system to present the host key when ssh is used\n"      
       
-      grep -qxF 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' /etc/ssh/sshd_config || echo 'HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub' | sudo tee -a /etc/ssh/sshd_config
-      grep -qxF 'HostKey /etc/ssh/ssh_host_rsa_key' /etc/ssh/sshd_config || echo 'HostKey /etc/ssh/ssh_host_rsa_key' | sudo tee -a /etc/ssh/sshd_config
+      # remove previous entries
+      sed -i '/HostCertificate \*.*/d' /etc/ssh/sshd_config
+      sed -i '/HostKey \*.*/d' /etc/ssh/sshd_config
+
+      # this should not match as I've just deleted the entry above
+      grep -qxF "HostCertificate /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub" /etc/ssh/sshd_config || echo "HostCertificate /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub" | sudo tee -a /etc/ssh/sshd_config
+      grep -qxF "HostKey /etc/ssh/${TARGETNAME}-ssh-rsa-host-key" /etc/ssh/sshd_config || echo "HostKey /etc/ssh/${TARGETNAME}-ssh-rsa-host-key" | sudo tee -a /etc/ssh/sshd_config
       
       
       echo -e "\nConfigure the target system also accept host keys from other certified systems - when acting as a client\n"
