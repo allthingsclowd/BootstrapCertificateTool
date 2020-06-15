@@ -17,7 +17,7 @@ source /usr/local/bootstrap/var.env
 # wget -O - ${BootStrapCertTool} | bash -s nginx "server.global.nginx" "client.global.nginx" "1.2.3.4"
 
 IPS=`hostname -I | sed 's/ /,/g' | sed 's/,*$//g'`
-certversion=0.0.21
+certversion=0.0.23
 export BootstrapSSHTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/${certversion}/scripts/BootStrapMe.sh"
 # Generate OpenSSH Certs
 wget -O - ${BootstrapSSHTool} | bash -s - -H -n BASTIONHOST -h ${HOSTNAME} -i ${IPS} -a *.hashistack.ie,hashistack.ie -p 81.143.215.2 -s
