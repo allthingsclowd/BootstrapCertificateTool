@@ -260,7 +260,6 @@ generate_and_configure_new_host_keys() {
     # create new host key
     ssh-keygen -N '' -C ${TARGETNAME}-SSH-HOST-RSA-KEY -t rsa \
                 -b 4096 -h \
-                -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
                 -f ${keyFile} && \
         echo -e "\nNew SSH keys created - ${keyFile}, ${keyFile}.pub\n" || \
         echo -e "\nError creating ssh host key.\n"
@@ -268,7 +267,7 @@ generate_and_configure_new_host_keys() {
     echo -e "\nSign the new keys for ${TARGETNAME} \n"
     # Sign the public key
     ssh-keygen -s ${caFile}.tmp -I ${TARGETNAME}_hashistack_server \
-               -h -n ${TARGETDNS},127.0.0.1,${TARGETNAME},${TARGETIPS}${PUBLICIP} \
+               -h  \
                -V -5m:+52w ${keyFile}.pub && \
         echo -e "\nNew SIGNED SSH CERTIFICATE created - ${keyFile}-cert.pub\n" || \
         echo -e "\nError signing ssh host key.\n"        

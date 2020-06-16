@@ -4,3 +4,5 @@ Outputs/IntermediateCAs/*
 PublicCerts_Protect/
 .bootstrap/*
 .DS_Store
+.keys/*
+
