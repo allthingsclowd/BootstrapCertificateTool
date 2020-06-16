@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source /usr/local/bootstrap/var.env
+
 export BootStrapCertTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.13/scripts/Generate_PKI_Certificates_For_Lab.sh"
 export BootstrapSSHTool="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.13/scripts/Generate_Access_Certificates.sh"
 export BootstrapSSHToolCA="https://raw.githubusercontent.com/allthingsclowd/BootstrapCertificateTool/0.0.13/scripts/BootstrapCAs.sh"
