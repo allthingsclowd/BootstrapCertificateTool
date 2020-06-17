@@ -110,10 +110,7 @@ control 'create-ssh-host-keys' do
   describe command('/usr/local/bootstrap/scripts/BootStrapMe.sh \
             -H \
             -n Bananas \
-            -h grazzer \
-            -i 192.168.9.11,192.168.9.4 \
-            -a hashistack.ie,*.hashistack.ie \
-            -p 8.8.8.8') do
+            -h grazzer') do
     its('exit_status') { should eq 0 }
     its('stdout') { should match /completed/ }
   end
@@ -122,9 +119,6 @@ control 'create-ssh-host-keys' do
             -H \
             -n Bananas \
             -h grazzer \
-            -i 192.168.9.11,192.168.9.4 \
-            -a hashistack.ie,*.hashistack.ie \
-            -p 8.8.8.8 \
             -s') do
     its('exit_status') { should eq 0 }
     its('stdout') { should match /completed/ }
@@ -150,9 +144,6 @@ control 'create-ssh-host-keys' do
             -H \
             -n TOMATOES \
             -h grazzer \
-            -i 192.168.9.11,192.168.9.4 \
-            -a hashistack.ie,*.hashistack.ie \
-            -p 8.8.8.8 \
             -s') do
     its('exit_status') { should eq 1 }
     its('stdout') { should match /BANG/ }
