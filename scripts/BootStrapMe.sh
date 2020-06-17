@@ -53,7 +53,7 @@ usage() {
   echo "Usage: ${0} -R -n NAME to reinitialise an OpenSSL Certificate Authority" 1>&2
   echo "Usage: ${0} -C -n NAME to create an OpenSSL Certificate Authority" 1>&2
   echo "Usage: ${0} -D -n NAME to delete an OpenSSL Certificate Authority" 1>&2
-  echo "Usage: ${0} -H -n NAME -h HOSTNAME -i IPADDRESSES -a DOMAINS -p PUBLICIP [-s SET THE KEYS] to create an OpenSSH HostKey" 1>&2
+  echo "Usage: ${0} -H -n NAME -h HOSTNAME [-s SET THE KEYS] to create an OpenSSH HostKey" 1>&2
   echo "Usage: ${0} -U -n NAME -u USERNAME -b {string of comma separated principals e.g. 'graham,fred,brian'} [-s create user account and copy keys to target] to create an OpenSSH HostKey" 1>&2
   echo "Usage: ${0} -Z Nuke All Certificates!!!" 1>&2
 
@@ -398,7 +398,6 @@ done
 ([ "${SSHINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ]) && ssh_init
 ([ "${SSLINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ]) && ssl_init
 ([ "${TARGETHOST}" == "TRUE" ] && [ ! "${NAME}" == "" ] && \
-  [ ! "${TARGETDNS}" == "" ] && [ ! "${TARGETIPS}" == "" ] && \
   [ ! "${TARGETNAME}" == "" ]) && generate_and_configure_new_host_keys
 ([ "${USERKEY}" == "TRUE" ] && [ ! "${NAME}" == "" ] && \
   [ ! "${USER}" == "" ] && [ ! "${PRINCIPALS}" == "" ]) && generate_and_configure_new_user_keys  
