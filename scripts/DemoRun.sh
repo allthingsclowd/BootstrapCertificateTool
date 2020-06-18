@@ -93,8 +93,38 @@ systemctl restart sshd
 #     in-target sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config;
 
 # STEP 5 - Update Vagrant Deployment Pipeline for Dev work
+# Vagrant.configure("2") do |config|
+ 
+#     #global config
+#     config.ssh.username = "packman"
+#     config.ssh.private_key_path = "/Users/grazzer/.ssh/packman-id_rsa"
+
+#     config.vm.synced_folder "TAME", "/home/packman/TAME", owner: "packman"
+#     config.vm.synced_folder ".", "/usr/local/bootstrap"
+#     config.vm.box = "allthingscloud/TAMBlueprint"
+
+#     config.vm.provider "virtualbox" do |v|
+#         v.memory = 8192
+#         v.cpus = 4
+#     end
 
 # STEP 6 - Update Terraform code for local deployment
+#   connection {
+#         bastion_host = var.bastion_host
+#         bastion_port = var.bastion_port
+#         bastion_user = var.bastion_user
+#         bastion_private_key = file(var.bastion_private_key)
+#         bastion_certificate = file(var.bastion_certificate)
+#         bastion_host_key = file(var.bastion_host_key)
+#         type     = "ssh"
+#         user     = var.ssh_username
+#         private_key = file(var.ssh_private_key)
+#         certificate = file(var.ssh_certificate)
+#         host_key = file(var.ssh_host_key)
+#         host = self.default_ip_address
+#   }
+
+# HIT this BUG - https://github.com/hashicorp/terraform/issues/6263 will revert both keys to a single key - sigh...
 
 # STEP 7 - [Optional] Migrate to TF Cloud and Bootstrap their too :)
 
