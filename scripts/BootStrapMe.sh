@@ -53,7 +53,7 @@ usage() {
   echo "Usage: ${0} -R -n NAME to reinitialise an OpenSSL Certificate Authority" 1>&2
   echo "Usage: ${0} -C -n NAME to create an OpenSSL Certificate Authority" 1>&2
   echo "Usage: ${0} -D -n NAME to delete an OpenSSL Certificate Authority" 1>&2
-  echo "Usage: ${0} -H -n NAME -h HOSTNAME -i IPADDRESSES -a DOMAINS -p PUBLICIP [-s SET THE KEYS] to create an OpenSSH HostKey" 1>&2
+  echo "Usage: ${0} -H -n NAME -h HOSTNAME [-s SET THE KEYS] to create an OpenSSH HostKey" 1>&2
   echo "Usage: ${0} -U -n NAME -u USERNAME -b {string of comma separated principals e.g. 'graham,fred,brian'} [-s create user account and copy keys to target] to create an OpenSSH HostKey" 1>&2
   echo "Usage: ${0} -Z Nuke All Certificates!!!" 1>&2
 
@@ -223,7 +223,11 @@ generate_and_configure_new_user_keys() {
 
         # Move the USER CA Public signing key into the sshd_config file
         cp ${caFile}.pub.tmp /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
+
+        # Remove existing lines that match this configuration
+        sed -i '/^TrustedUserCAKeys/d' /etc/ssh/sshd_config
         echo -e "\nConfigure the target system to Trust user certificates signed by the ${NAME}-SSH-USER-RSA-CA key when ssh certificates are used"
+        # This first grep will fail everytime because of the above deletion...tidy later
         grep -qxF "TrustedUserCAKeys /etc/ssh/${NAME}-ssh-user-rsa-ca.pub" /etc/ssh/sshd_config || echo "TrustedUserCAKeys /etc/ssh/${NAME}-ssh-user-rsa-ca.pub" | sudo tee -a /etc/ssh/sshd_config
 
         chmod 644 /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
@@ -288,9 +292,9 @@ generate_and_configure_new_host_keys() {
 
       echo -e "\nConfigure the target system to present the host key when ssh is used\n"      
       
-      # remove previous entries
-      sed -i '/HostCertificate \*.*/d' /etc/ssh/sshd_config
-      sed -i '/HostKey \*.*/d' /etc/ssh/sshd_config
+      # Remove existing lines that match this configuration
+      sed -i '/^HostCertificate/d' /etc/ssh/sshd_config
+      sed -i '/^HostKey/d' /etc/ssh/sshd_config
 
       # this should not match as I've just deleted the entry above
       grep -qxF "HostCertificate /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub" /etc/ssh/sshd_config || echo "HostCertificate /etc/ssh/${TARGETNAME}-ssh-rsa-host-key-cert.pub" | sudo tee -a /etc/ssh/sshd_config
@@ -398,7 +402,6 @@ done
 ([ "${SSHINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ]) && ssh_init
 ([ "${SSLINIT}" == "TRUE" ] && [ ! "${NAME}" == "" ]) && ssl_init
 ([ "${TARGETHOST}" == "TRUE" ] && [ ! "${NAME}" == "" ] && \
-  [ ! "${TARGETDNS}" == "" ] && [ ! "${TARGETIPS}" == "" ] && \
   [ ! "${TARGETNAME}" == "" ]) && generate_and_configure_new_host_keys
 ([ "${USERKEY}" == "TRUE" ] && [ ! "${NAME}" == "" ] && \
   [ ! "${USER}" == "" ] && [ ! "${PRINCIPALS}" == "" ]) && generate_and_configure_new_user_keys  
