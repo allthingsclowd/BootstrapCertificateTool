@@ -221,7 +221,7 @@ generate_and_configure_new_user_keys() {
 
         echo -e "\nMove the TrustedUserCAKeys into Place\n"
 
-        [ -f "${caFile}".pub ] && rm -f ${caFile} ${caFile}.pub
+        [ -f "${caFile}".pub ] && whoami && rm -f ${caFile} && rm -f ${caFile}.pub
 
         # Move the USER CA Public signing key into the sshd_config file
         cp -f ${caFile}.pub.tmp /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
