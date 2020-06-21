@@ -220,6 +220,8 @@ generate_and_configure_new_user_keys() {
         chown -R ${USER}:${USER} /home/${USER}/
 
         echo -e "\nMove the TrustedUserCAKeys into Place\n"
+        
+        echo -e "Current User: $(whoami) \n"
 
         [ -f "${caFile}".pub ] && whoami && rm -f ${caFile} && rm -f ${caFile}.pub
 
