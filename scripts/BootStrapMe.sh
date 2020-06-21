@@ -131,7 +131,7 @@ verify_ca_signing_keys() {
     export caEnv="${NAME}"_ssh_rsa_ca
     export caPubEnv="${NAME}"_ssh_rsa_ca_pub
 
-    if ( [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] ); then
+    if { [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] }; then
         echo -e "\n${!caEnv} or ${!caPubEnv} environment variable need to be set\n"
         # load the signing keys into memory
         if [ -f "${bootStrapFile}" ]; then
@@ -139,7 +139,7 @@ verify_ca_signing_keys() {
           source ${bootStrapFile}
           echo -e "\nBoth ${!caEnv:-'Missing'} and ${!caPubEnv:-'Missing'} should now be set\n"
 
-          if ( [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] ); then
+          if { [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] }; then
             echo -e "\nBANG! No signing keys found in ${bootStrapFile} to commence bootstrap process\n"
             exit 1
           fi
@@ -175,6 +175,8 @@ generate_and_configure_new_user_keys() {
     
     # Create directories
     [ -d ${tmpDir} ] || mkdir -p ${tmpDir}
+    
+    pushd ${tmpDir}
 
     # Create new host keys if they don't already exist
     echo -e "Generate new ssh keys for user ${USER}"
@@ -194,7 +196,7 @@ generate_and_configure_new_user_keys() {
     chmod 644 ${keyFile}.pub
     chmod 644 ${keyFile}-cert.pub
 
-    echo -e "\n${NAME} SSH USER CA and Key creation process for ${USER} is has completed."
+    echo -e "\n${NAME} SSH USER CA and Key creation process for ${USER} has completed."
 
     # If set option, -s, is selected create user on host and move keys into place 
     if [ ! "${SETKEY}" == "FALSE" ]; then
@@ -207,7 +209,7 @@ generate_and_configure_new_user_keys() {
           
         fi
 
-        mkdir -p /home/${USER}/.ssh
+        [ -d "/home/${USER}/.ssh" ] || mkdir -p /home/${USER}/.ssh
         cp ${keyFile} /home/${USER}/.ssh/.
         cp ${keyFile}.pub /home/${USER}/.ssh/.
         cp ${keyFile}-cert.pub /home/${USER}/.ssh/.
@@ -222,7 +224,7 @@ generate_and_configure_new_user_keys() {
         [ -f "${caFile}".pub ] && rm -f ${caFile} ${caFile}.pub
 
         # Move the USER CA Public signing key into the sshd_config file
-        cp ${caFile}.pub.tmp /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
+        cp -f ${caFile}.pub.tmp /etc/ssh/${NAME}-ssh-user-rsa-ca.pub
 
         # Remove existing lines that match this configuration
         sed -i '/^TrustedUserCAKeys/d' /etc/ssh/sshd_config
@@ -238,6 +240,7 @@ generate_and_configure_new_user_keys() {
     # SECURITY - remove the private signing key - in realworld scenarios (production) this key should NEVER leave the signing server - flawed bootstrapping process
    rm -rf ${caFile}.tmp
    rm -rf ${caFile}.pub.tmp
+   popd
     
     echo -e "\n==========USER Keys Creation Completed Successfully================"
 }
