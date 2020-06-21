@@ -131,7 +131,7 @@ verify_ca_signing_keys() {
     export caEnv="${NAME}"_ssh_rsa_ca
     export caPubEnv="${NAME}"_ssh_rsa_ca_pub
 
-    if ( [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] }; then
+    if ( [ -z "${!caEnv}" ] || [ -z "${!caPubEnv}" ] ); then
         echo -e "\n${!caEnv} or ${!caPubEnv} environment variable need to be set\n"
         # load the signing keys into memory
         if [ -f "${bootStrapFile}" ]; then
